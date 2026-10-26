@@ -1,0 +1,2560 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sakuga</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-12 -12 24 24'%3E%3Cg fill='%23ffb7c5'%3E%3Cpath id='p' d='M0 -1 C -4 -4 -4 -9 -1.5 -11 L 0 -9 L 1.5 -11 C 4 -9 4 -4 0 -1Z'/%3E%3Cuse href='%23p' transform='rotate(72)'/%3E%3Cuse href='%23p' transform='rotate(144)'/%3E%3Cuse href='%23p' transform='rotate(216)'/%3E%3Cuse href='%23p' transform='rotate(288)'/%3E%3C/g%3E%3Ccircle r='1.8' fill='%23ff5a8c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;600&family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Sakuga: dunkel, Openings pink, Endings blau, Marke und Muster in Kirschblüte. */
+:root {
+  --bg: #0c0a12;
+  --surface: #15121e;
+  --surface-2: #1e1a2a;
+  --line: #2c2640;
+  --fg: #efeaf7;
+  --muted: #9d95b3;
+  --op: #ff5a8c;
+  --ed: #57c7ff;
+  --gold: #ffc857;
+  --sakura: #ffb7c5;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --font-display: "Dela Gothic One", "Hiragino Kaku Gothic StdN", "Yu Gothic", sans-serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --font-mono: "Azeret Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background-color: var(--bg); color: var(--fg); margin: 0; }
+body { font-family: var(--font-body); font-size: 15px; line-height: 1.55; min-height: 100vh; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+a { color: inherit; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--op); outline-offset: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+/* Header */
+header.top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; align-items: center; gap: 12px 16px; padding-block: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; text-decoration: none; }
+.brand b {
+  font-family: var(--font-display); font-weight: 400; font-size: 24px; letter-spacing: .02em;
+  background: linear-gradient(100deg, var(--sakura) 0%, var(--op) 45%, var(--sakura) 70%, #fff0f4 100%);
+  background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  transition: background-position .9s var(--ease);
+}
+.brand:hover b { background-position: 100% 0; }
+.brand .bloom { width: 22px; height: 22px; color: var(--sakura); transition: transform .9s var(--ease); }
+.brand:hover .bloom { transform: rotate(144deg) scale(1.1); }
+.brand small { font-family: var(--font-display); color: var(--muted); font-size: 12px; }
+.searchbox { flex: 1 1 100%; order: 3; position: relative; }
+.searchbox input { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 12px 44px; font: inherit; font-size: 16px; color: var(--fg); transition: border-color .2s; }
+.searchbox input:focus { border-color: color-mix(in srgb, var(--sakura) 60%, var(--line)); }
+.searchbox input::placeholder { color: var(--muted); }
+.searchbox svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.searchbox .spin { position: absolute; right: 16px; top: 50%; width: 16px; height: 16px; margin-top: -8px; border: 2px solid var(--line); border-top-color: var(--sakura); border-radius: 50%; animation: spin .8s linear infinite; }
+nav.tabs { display: flex; gap: 4px; margin-left: auto; align-items: center; }
+nav.tabs a { border: 1px solid transparent; border-radius: 999px; padding: 6px 14px; color: var(--muted); font-weight: 500; text-decoration: none; transition: color .2s, background .25s var(--ease), border-color .25s; }
+nav.tabs a:hover { color: var(--fg); }
+nav.tabs a[aria-current="page"] { color: var(--fg); border-color: var(--line); background: var(--surface); }
+.lang { margin-left: 4px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); transition: border-color .2s; }
+.lang:hover { border-color: color-mix(in srgb, var(--sakura) 50%, var(--line)); }
+.lang .on { color: var(--fg); }
+@media (min-width: 820px) { .searchbox { flex: 1 1 auto; order: 0; max-width: 520px; } nav.tabs { margin-left: 0; } }
+@media (max-width: 420px) { .brand small { display: none; } }
+
+
+/* Kirschblüten */
+.petals { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.petals i { position: absolute; top: -24px; border-radius: 80% 0 80% 0; background: var(--sakura); opacity: .2; animation: fall linear infinite; }
+main, footer { position: relative; z-index: 1; }
+footer { padding-block: 40px; font-size: 12px; color: var(--muted); }
+
+/* Filter, Knöpfe */
+.filters { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; padding-block: 20px 6px; }
+.fgroup { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.fgroup > .label { margin-right: 4px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px; font-size: 13px; color: var(--muted); transition: color .2s, background .25s var(--ease), border-color .25s, transform .15s var(--ease); }
+.chip:hover { color: var(--fg); border-color: color-mix(in srgb, var(--sakura) 55%, var(--line)); }
+.chip[aria-pressed="true"] { color: var(--bg); background: var(--fg); border-color: var(--fg); font-weight: 700; }
+.chip.op[aria-pressed="true"] { background: var(--op); border-color: var(--op); }
+.chip.ed[aria-pressed="true"] { background: var(--ed); border-color: var(--ed); }
+.chip.in[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); }
+select { background: var(--surface); border: 1px solid var(--line); color: var(--fg); border-radius: 8px; padding: 5px 10px; font: inherit; font-size: 13px; }
+.btn { border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 8px 16px; font-weight: 700; font-size: 14px; display: inline-flex; gap: 8px; align-items: center; text-decoration: none; transition: transform .2s var(--ease), box-shadow .25s, border-color .2s; }
+.btn:not(:disabled):hover { transform: translateY(-2px); border-color: var(--muted); }
+.btn.primary { background: var(--op); border-color: var(--op); color: #1a0710; }
+.btn.primary:not(:disabled):hover { box-shadow: 0 8px 24px -8px var(--op); }
+.btn.ghost { background: none; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.chip:active, .btn:active, .size:active { transform: scale(.96); }
+.resultbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: 8px 14px; color: var(--muted); font-size: 13px; }
+.resultbar .tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; background: var(--surface); position: relative; }
+.seg button { background: none; border: 0; border-radius: 999px; padding: 5px 10px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; font-size: 13px; position: relative; z-index: 1; transition: color .2s; }
+.seg button[aria-pressed="true"] { color: var(--bg); }
+.seg .knob { position: absolute; top: 2px; bottom: 2px; left: 2px; width: calc(50% - 2px); border-radius: 999px; background: var(--fg); transition: transform .35s var(--ease); }
+.seg[data-on="grid"] .knob { transform: translateX(100%); }
+.tag { font-family: var(--font-mono); font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 5px; letter-spacing: .04em; color: var(--op); background: color-mix(in srgb, var(--op) 14%, transparent); white-space: nowrap; }
+.tag.ed { color: var(--ed); background: color-mix(in srgb, var(--ed) 14%, transparent); }
+.tag.in { color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, transparent); }
+.message { padding: 48px 0; color: var(--muted); text-align: center; max-width: 60ch; margin: 0 auto; }
+.message b { color: var(--fg); }
+
+/* Cover */
+.cover { position: relative; overflow: hidden; aspect-ratio: 3 / 4; width: 100%; min-height: 0; border-radius: 8px; background: linear-gradient(160deg, var(--c1, #6b2a4a), #1a1430); container-type: inline-size; }
+.cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cover .fallback { position: absolute; inset: 0; padding: 10%; font-family: var(--font-display); font-size: 13cqi; line-height: 1.1; color: rgba(255,255,255,.9); overflow: hidden; }
+
+/* Liste */
+.list { display: grid; gap: 2px; padding-bottom: 48px; }
+.row { display: grid; grid-template-columns: 52px minmax(0,1fr) auto; gap: 14px; align-items: center; padding: 8px 10px; border-radius: 10px; text-decoration: none; transition: background .25s, transform .25s var(--ease); }
+.row:hover { background: var(--surface); transform: translateX(4px); }
+.row .cover { transition: transform .35s var(--ease); }
+.row:hover .cover { transform: scale(1.08) rotate(-3deg); }
+.row .song { font-weight: 700; font-size: 15.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .2s; }
+.row:hover .song { color: var(--sakura); }
+.row .sub { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .right { display: flex; gap: 10px; align-items: center; color: var(--muted); font-size: 12.5px; font-family: var(--font-mono); }
+.row .season { display: none; }
+@media (min-width: 640px) { .row .season { display: inline; } }
+
+/* Kacheln */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 24px 16px; padding-bottom: 48px; }
+@media (min-width: 640px) { .grid { grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); } }
+.card { display: grid; gap: 10px; align-content: start; min-width: 0; text-decoration: none; }
+.card > * { min-width: 0; }
+.card .art { position: relative; border-radius: 12px; overflow: hidden; transition: transform .35s var(--ease), box-shadow .35s; }
+.card .art .cover { border-radius: 0; transition: transform .6s var(--ease); }
+.card .art .tag { position: absolute; left: 10px; top: 10px; z-index: 2; backdrop-filter: blur(6px); background: rgba(12,10,18,.65); }
+.card .hoverplay { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; background: rgba(12,10,18,.35); opacity: 0; transition: opacity .25s; }
+.card .hoverplay span { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--op); transform: scale(.6); transition: transform .35s var(--ease); }
+.card:hover .art, .card:focus-visible .art { transform: translateY(-6px); box-shadow: 0 18px 34px -16px var(--glow, var(--op)); }
+.card:hover .art .cover { transform: scale(1.07); }
+.card:hover .hoverplay, .card:focus-visible .hoverplay { opacity: 1; }
+.card:hover .hoverplay span { transform: scale(1); }
+.card .song { font-weight: 700; font-size: 15px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color .2s; }
+.card:hover .song { color: var(--sakura); }
+.card .sub { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Skeleton */
+.skel { display: grid; gap: 8px; padding-block: 8px 48px; }
+.skel div { height: 68px; border-radius: 10px; background: linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 50%, var(--surface) 100%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+
+/* Song */
+.detail { display: grid; gap: 28px; padding-block: 20px 56px; }
+@media (min-width: 960px) { .detail { grid-template-columns: minmax(0, 1fr) 320px; } }
+.back { color: var(--muted); font-size: 14px; text-decoration: none; transition: color .2s; }
+.back:hover { color: var(--fg); }
+.player { position: relative; aspect-ratio: 16 / 9; max-width: 100%; border-radius: 14px; overflow: hidden; background: #000; }
+.player video { width: 100%; height: 100%; display: block; background: #000; }
+.player .poster { position: absolute; inset: 0; width: 100%; border: 0; padding: 0; display: grid; place-items: center; background-color: var(--surface); background-size: cover; background-position: center 30%; transition: filter .3s; }
+.player .poster::before { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.6)); }
+.player .poster:hover { filter: saturate(1.15) brightness(1.05); }
+.playbtn { position: relative; z-index: 1; width: 76px; height: 76px; border-radius: 50%; background: rgba(12,10,18,.75); border: 2px solid rgba(255,255,255,.8); display: grid; place-items: center; transition: transform .25s var(--ease); }
+.playbtn::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid rgba(255,255,255,.6); opacity: 0; }
+.poster:hover .playbtn { transform: scale(1.1); }
+.poster:hover .playbtn::after { animation: ring 1.1s var(--ease) infinite; }
+.player.small .playbtn { width: 56px; height: 56px; }
+.player .vtags { position: absolute; right: 14px; bottom: 12px; z-index: 1; display: flex; gap: 6px; font-family: var(--font-mono); font-size: 11px; color: rgba(255,255,255,.85); }
+.player .vtags span { border: 1px solid rgba(255,255,255,.5); padding: 1px 6px; border-radius: 4px; }
+.player.novideo { display: grid; place-items: center; background: var(--surface); color: var(--muted); font-size: 14px; }
+.titleblock { display: grid; gap: 6px; padding-top: 18px; }
+.titleblock .eyebrow { display: flex; gap: 10px; align-items: center; color: var(--muted); font-size: 13px; }
+.titleblock h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 4.5vw, 46px); line-height: 1.1; margin: 0; text-wrap: balance; }
+.titleblock .artist { font-size: 18px; color: var(--muted); }
+.titleblock .artist b { color: var(--fg); }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; padding-top: 12px; }
+.credits { border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; align-self: start; background: var(--surface); transition: border-color .3s; }
+.credits:hover { border-color: color-mix(in srgb, var(--sakura) 40%, var(--line)); }
+.mycover { display: grid; grid-template-columns: 92px minmax(0,1fr); gap: 14px; align-items: end; margin-bottom: 18px; padding: 6px; margin-inline: -6px; border-radius: 12px; transition: background .25s; }
+.mycover .cover { box-shadow: 0 10px 24px -14px var(--c1, var(--op)); transition: transform .35s var(--ease); }
+.mycover:hover .cover { transform: rotate(-2deg) scale(1.03); }
+.mycover.drag { background: color-mix(in srgb, var(--sakura) 12%, transparent); outline: 2px dashed var(--sakura); }
+.mycover .tools { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.mycover small { color: var(--muted); font-size: 12px; }
+.filechip { cursor: pointer; }
+.filechip:focus-within { outline: 2px solid var(--op); outline-offset: 2px; }
+.poster.waiting .playbtn::before { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid transparent; border-top-color: var(--sakura); animation: spin .8s linear infinite; }
+.credits h2, .more h2 { margin: 0 0 12px; font-weight: 500; }
+.credits dl { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 9px 16px; margin: 0; font-size: 14px; }
+.credits dt { color: var(--muted); }
+.credits dd { margin: 0; font-weight: 500; }
+.credits dd small { display: block; color: var(--muted); font-size: 13px; font-weight: 400; }
+.more { padding-top: 28px; }
+.more .list { padding-bottom: 0; }
+
+/* Turnier */
+.tsetup { padding-block: 26px 56px; display: grid; gap: 26px; max-width: 760px; }
+h1.big { font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 5vw, 44px); line-height: 1.1; margin: 0; text-wrap: balance; }
+.tsetup p { color: var(--muted); margin: 6px 0 0; max-width: 60ch; }
+.opt { display: grid; gap: 10px; }
+.hint { font-size: 13px; color: var(--muted); }
+.sizes { display: flex; gap: 10px; flex-wrap: wrap; }
+.size { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 14px 20px; min-width: 96px; text-align: left; transition: transform .2s var(--ease), border-color .2s, box-shadow .25s; }
+.size b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 28px; line-height: 1; }
+.size small { color: var(--muted); font-size: 12px; }
+.size:not(:disabled):hover { transform: translateY(-3px); border-color: var(--muted); }
+.size[aria-pressed="true"] { border-color: var(--op); box-shadow: inset 0 0 0 1px var(--op), 0 10px 24px -14px var(--op); }
+.size:disabled { filter: opacity(.35); cursor: not-allowed; } /* filter, weil die Einblend-Animation opacity überschreibt */
+.tseason { display: flex; gap: 10px; flex-wrap: wrap; }
+/* Startseite */
+.home { display: grid; gap: 44px; padding-block: 36px 24px; }
+.hero { display: grid; justify-items: center; text-align: center; gap: 14px; padding-top: 18px; }
+.hero .bigbloom { width: 92px; height: 92px; color: var(--sakura); filter: drop-shadow(0 10px 30px rgba(255,90,140,.45)); animation: spin 40s linear infinite; }
+.hero h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(48px, 10vw, 88px); line-height: 1; letter-spacing: .02em;
+  background: linear-gradient(100deg, var(--sakura) 0%, var(--op) 45%, var(--sakura) 70%, #fff0f4 100%); background-size: 220% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 9s linear infinite; }
+.hero h1 { padding-bottom: .12em; }
+@media (max-width: 480px) { nav.tabs a { padding: 6px 9px; } .lang { padding: 6px 9px; } }
+.hero h1 small { font-size: .32em; margin-left: .3em; vertical-align: .9em; -webkit-text-fill-color: var(--muted); }
+.hero p { margin: 0; color: var(--muted); max-width: 52ch; font-size: 16px; }
+.hero .searchbox { width: min(640px, 100%); margin-top: 10px; order: 0; }
+.hero .searchbox input { padding-block: 16px; font-size: 17px; }
+.quick { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.qt { position: relative; display: grid; gap: 6px; padding: 18px 20px; border: 1px solid var(--pink-line); border-radius: 18px; text-decoration: none; overflow: hidden;
+  background: linear-gradient(150deg, var(--pink-soft), transparent 60%), var(--surface); transition: transform .3s var(--ease), border-color .25s, box-shadow .3s; }
+.qt:hover { transform: translateY(-5px); border-color: var(--sakura); box-shadow: 0 18px 36px -20px var(--op); }
+.qt .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--pink-soft); color: var(--sakura); border: 1px solid var(--pink-line); transition: transform .4s var(--ease); }
+.qt:hover .ic { transform: rotate(-8deg) scale(1.08); }
+.qt b { font-size: 16px; }
+.qt small { color: var(--muted); font-size: 13px; line-height: 1.4; }
+.hsec { display: grid; gap: 14px; }
+.hsec .head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.hsec h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 24px; }
+.hsec .head a, .hsec .head button { color: var(--sakura); font-size: 14px; text-decoration: none; background: none; border: 0; cursor: pointer; }
+.hsec .head a:hover, .hsec .head button:hover { text-decoration: underline; }
+.sotd { display: grid; gap: 22px; align-items: center; padding: 18px; border: 1px solid var(--pink-line); border-radius: 22px; background: radial-gradient(80% 120% at 0% 0%, color-mix(in srgb, var(--glow, var(--op)) 22%, transparent), transparent 70%), var(--surface); }
+@media (min-width: 820px) { .sotd { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); } }
+.sotd .label { color: var(--sakura); }
+.sotd .song { font-family: var(--font-display); font-size: clamp(26px, 4vw, 38px); line-height: 1.1; margin: 6px 0 4px; }
+.sotd .sub { color: var(--muted); }
+.sotd .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.hgrid { display: grid; gap: 20px 16px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+@media (min-width: 640px) { .hgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.skel { border-radius: 18px; min-height: 220px; background: linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 50%, var(--surface) 100%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+.tseason select { min-width: 150px; }
+.picker { display: grid; gap: 14px; }
+.picker .searchbox { max-width: none; }
+.plist { display: grid; gap: 6px; max-height: 420px; overflow: auto; padding-right: 4px; }
+.prow { display: grid; grid-template-columns: 40px minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 6px 8px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); transition: border-color .2s, background .2s; }
+.prow .cover { border-radius: 6px; }
+.prow .song { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prow .sub { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prow.on { border-color: var(--pink-line); background: var(--pink-soft); }
+.prow .tog { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--fg); font-size: 18px; line-height: 1; display: grid; place-items: center; transition: background .2s, border-color .2s, transform .15s var(--ease); }
+.prow .tog:hover { border-color: var(--sakura); transform: scale(1.08); }
+.prow.on .tog { background: var(--sakura); border-color: var(--sakura); color: #2a0d18; }
+.pickhead { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pickhead .btn { font-size: 13px; padding: 5px 12px; }
+.duel { padding-block: 22px 40px; display: grid; gap: 18px; }
+.duelhead { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.duelhead .label { color: var(--op); }
+.pbar { height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.pbar i { display: block; height: 100%; background: var(--op); transition: width .5s var(--ease); }
+.vs { display: grid; gap: 14px; align-items: stretch; }
+@media (min-width: 720px) { .vs { grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); } }
+.vsmark { font-family: var(--font-display); font-size: 30px; color: var(--muted); align-self: center; text-align: center; animation: pulse 2.4s ease-in-out infinite; }
+.fighter { display: grid; gap: 12px; border: 1px solid var(--line); background: var(--surface); border-radius: 16px; padding: 14px; min-width: 0; transition: transform .3s var(--ease), border-color .25s, box-shadow .3s, opacity .3s, filter .3s; }
+.fighter:hover { border-color: color-mix(in srgb, var(--op) 60%, var(--line)); transform: translateY(-4px); box-shadow: 0 20px 40px -24px var(--op); }
+.fighter .song { font-weight: 700; font-size: 18px; line-height: 1.3; }
+.fighter .sub { color: var(--muted); font-size: 13.5px; }
+.fighter .pick { width: 100%; justify-content: center; }
+.fighter.win { border-color: var(--gold); transform: scale(1.03); box-shadow: 0 0 0 2px var(--gold), 0 20px 50px -20px var(--gold); }
+.fighter.lose { opacity: .25; transform: scale(.96); filter: grayscale(.7); }
+.keys { font-size: 12px; color: var(--muted); text-align: center; }
+kbd { font-family: var(--font-mono); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+.bracketwrap { overflow-x: auto; padding-bottom: 12px; }
+.bracket { display: flex; gap: 18px; min-width: max-content; padding-top: 6px; }
+.bround { display: flex; flex-direction: column; width: 190px; }
+.bround h3 { font-size: 10.5px; margin: 0 0 4px; font-weight: 500; }
+.bcol { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 8px; }
+.bmatch { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); transition: border-color .3s, transform .25s var(--ease); }
+.bmatch:hover { transform: translateX(3px); }
+.bmatch.now { border-color: var(--op); box-shadow: 0 0 0 1px var(--op), 0 0 18px -6px var(--op); }
+.bmatch.champ { border-color: var(--gold); }
+.bslot { font-size: 12px; padding: 5px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+.bslot + .bslot { border-top: 1px solid var(--line); }
+.bslot.w { color: var(--fg); font-weight: 700; }
+.bslot.l { text-decoration: line-through; opacity: .5; }
+.bslot.tbd { font-style: italic; opacity: .5; }
+.champ { padding-block: 26px 40px; display: grid; gap: 22px; }
+.champcard { display: grid; gap: 22px; align-items: center; border: 1px solid var(--gold); border-radius: 18px; padding: 18px; background: var(--surface); }
+@media (min-width: 720px) { .champcard { grid-template-columns: 340px minmax(0,1fr); } }
+.champcard .label { color: var(--gold); }
+.champcard .song { font-family: var(--font-display); font-size: clamp(26px, 4vw, 40px); line-height: 1.1; }
+textarea.copy { width: 100%; min-height: 160px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; font-family: var(--font-mono); font-size: 12.5px; }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; z-index: 40; }
+.burst { position: fixed; left: 50%; top: 40%; pointer-events: none; z-index: 30; }
+.burst i { position: absolute; width: 12px; height: 9px; border-radius: 80% 0 80% 0; background: var(--sakura); animation: burst 1.6s var(--ease) forwards; }
+.burst i:nth-child(3n) { background: var(--gold); }
+.burst i:nth-child(4n) { background: var(--op); }
+
+/* Mehr Kirschblüte: rosa Akzente auf Flächen, Linien und Texten */
+:root { --pink-soft: color-mix(in srgb, var(--sakura) 13%, transparent); --pink-line: color-mix(in srgb, var(--sakura) 30%, var(--line)); scrollbar-color: color-mix(in srgb, var(--op) 70%, var(--line)) var(--bg); }
+::selection { background: var(--sakura); color: #2a0d18; }
+.petals { background: radial-gradient(55% 38% at 12% -6%, rgba(255,183,197,.17), transparent 70%), radial-gradient(45% 32% at 100% 8%, rgba(255,90,140,.13), transparent 70%), radial-gradient(60% 40% at 50% 115%, rgba(255,183,197,.08), transparent 70%); }
+header.top::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: linear-gradient(90deg, transparent, var(--sakura) 25%, var(--op) 50%, var(--sakura) 75%, transparent); opacity: .65; }
+.searchbox input { border-color: var(--pink-line); }
+.searchbox input:focus { border-color: var(--sakura); box-shadow: 0 0 0 4px var(--pink-soft); }
+.searchbox svg { color: var(--sakura); }
+nav.tabs a:hover { color: var(--sakura); }
+nav.tabs a[aria-current="page"] { color: var(--sakura); border-color: var(--pink-line); background: var(--pink-soft); }
+.lang { border-color: var(--pink-line); }
+.lang .on { color: var(--sakura); }
+.label { color: color-mix(in srgb, var(--sakura) 72%, var(--muted)); }
+.chip { border-color: color-mix(in srgb, var(--sakura) 16%, var(--line)); }
+.chip[aria-pressed="true"] { color: #2a0d18; background: var(--sakura); border-color: var(--sakura); }
+select { border-color: var(--pink-line); }
+.num { color: var(--sakura); font-weight: 600; }
+.seg { border-color: var(--pink-line); }
+.seg .knob { background: var(--sakura); }
+.seg button[aria-pressed="true"] { color: #2a0d18; }
+.btn { border-color: var(--pink-line); }
+.btn.ghost:not(:disabled):hover { color: var(--sakura); border-color: var(--sakura); background: var(--pink-soft); }
+.row:hover { background: linear-gradient(90deg, var(--pink-soft), color-mix(in srgb, var(--sakura) 4%, transparent) 70%, transparent); }
+.row .cover, .card .art { box-shadow: 0 0 0 1px color-mix(in srgb, var(--sakura) 18%, transparent); }
+.skel div { background: linear-gradient(90deg, var(--surface) 0%, color-mix(in srgb, var(--sakura) 10%, var(--surface-2)) 50%, var(--surface) 100%); background-size: 200% 100%; }
+.titleblock h1 { background: linear-gradient(100deg, #fff 0%, #fff 45%, var(--sakura) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.titleblock .artist b { color: var(--sakura); }
+.credits { border-color: var(--pink-line); background: linear-gradient(165deg, color-mix(in srgb, var(--sakura) 9%, var(--surface)), var(--surface) 55%); }
+.credits dt { color: color-mix(in srgb, var(--sakura) 45%, var(--muted)); }
+.player { box-shadow: 0 24px 60px -30px color-mix(in srgb, var(--op) 70%, transparent), 0 0 0 1px var(--pink-line); }
+.player.novideo { background: linear-gradient(160deg, var(--pink-soft), var(--surface)); }
+.fighter { border-color: var(--pink-line); background: linear-gradient(165deg, color-mix(in srgb, var(--sakura) 7%, var(--surface)), var(--surface) 60%); }
+.size, .bmatch { border-color: var(--pink-line); }
+.toast { background: var(--sakura); color: #2a0d18; }
+footer a { color: var(--sakura); }
+nav.tabs a.gear { display: inline-flex; align-items: center; padding: 6px 9px; margin-left: 2px; }
+nav.tabs a.gear svg { transition: transform .5s var(--ease); }
+nav.tabs a.gear:hover svg, nav.tabs a.gear[aria-current="page"] svg { transform: rotate(60deg); }
+.settings { max-width: 780px; padding-block: 32px 8px; }
+.settings > p { color: var(--muted); margin: 8px 0 0; }
+.sgroup { margin-top: 22px; border: 1px solid var(--pink-line); background: linear-gradient(160deg, var(--pink-soft), transparent 55%), var(--surface); border-radius: 18px; padding: 4px 22px 6px; }
+.sgroup h2 { margin: 16px 0 2px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--sakura); display: flex; align-items: center; gap: 8px; }
+.srow { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; padding: 14px 0; border-top: 1px solid var(--line); }
+.sgroup h2 + .srow { border-top: 0; }
+.srow .sl { flex: 1 1 260px; min-width: 0; }
+.srow .sl b { font-weight: 600; }
+.srow .sl small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 3px; line-height: 1.45; }
+.srow .sc { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.srow .btn { font-size: 13px; padding: 6px 14px; cursor: pointer; }
+.srow .btn.danger { color: var(--op); border-color: color-mix(in srgb, var(--op) 45%, var(--line)); }
+.srow .btn.danger.sure { background: var(--op); color: #1a0710; }
+.srow .count { font-family: var(--font-mono); font-size: 12px; color: var(--sakura); background: var(--pink-soft); border: 1px solid var(--pink-line); border-radius: 999px; padding: 2px 9px; margin-left: 6px; }
+body.calm .petals i { display: none; }
+nav.tabs a, .lang { white-space: nowrap; }
+
+/* Weitere Staffeln und Filme */
+.franchise { padding-top: 30px; }
+.franchise h2 { margin: 0 0 12px; font-weight: 500; }
+.frlist { display: grid; gap: 8px; }
+.fr { border: 1px solid var(--pink-line); border-radius: 12px; background: var(--surface); overflow: hidden; transition: border-color .25s, box-shadow .3s, transform .25s var(--ease); }
+.fr:hover { border-color: var(--sakura); box-shadow: 0 12px 30px -20px var(--op); }
+.frhead { display: grid; grid-template-columns: 40px minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 8px 12px; list-style: none; cursor: pointer; }
+.frhead::-webkit-details-marker { display: none; }
+.frhead .t { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .2s; }
+.fr:hover .frhead .t { color: var(--sakura); }
+.frhead .s { color: var(--muted); font-size: 12.5px; }
+.frhead .chev { color: var(--sakura); transition: transform .3s var(--ease); }
+.fr[open] .chev { transform: rotate(90deg); }
+.fr[open] { background: linear-gradient(165deg, color-mix(in srgb, var(--sakura) 8%, var(--surface)), var(--surface) 60%); }
+.fr .list { padding: 0 6px 8px; }
+.fr[open] .list { animation: fade .35s var(--ease); }
+.fr.current { border-style: dashed; background: var(--pink-soft); }
+.fr.current .frhead { cursor: default; }
+.here { font-size: 11px; font-weight: 700; color: #2a0d18; background: var(--sakura); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+
+/* Eigene Songs */
+.tag.mine { color: #2a0d18; background: var(--sakura); }
+.card .art .tag.corner { left: auto; right: 10px; color: #2a0d18; background: var(--sakura); }
+.cform { padding-block: 26px 56px; display: grid; gap: 22px; max-width: 760px; }
+.cform p { color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+.field { display: grid; gap: 8px; align-content: start; }
+.cform input:not([type=file]), .cform select { width: 100%; background: var(--surface); border: 1px solid var(--pink-line); border-radius: 10px; padding: 10px 14px; color: var(--fg); font: inherit; font-size: 15px; transition: border-color .2s, box-shadow .2s; }
+.cform input:focus, .cform select:focus { outline: none; border-color: var(--sakura); box-shadow: 0 0 0 4px var(--pink-soft); }
+.cform input::placeholder { color: var(--muted); }
+.grid2 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+/* Die Vorschlagsliste muss über den folgenden Feldern liegen, die durch die Einblend-Animation eigene Ebenen bilden. */
+.animefield { position: relative; z-index: 20; }
+.acwrap { position: relative; }
+.ac { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 10; max-height: min(420px, 60vh); overflow-y: auto; background: var(--surface-2); border: 1px solid var(--pink-line); border-radius: 12px; padding: 6px; display: grid; gap: 2px; box-shadow: 0 24px 48px -20px #000; animation: fade .2s var(--ease); }
+.ac button { display: grid; grid-template-columns: 36px minmax(0,1fr); gap: 12px; align-items: center; text-align: left; background: none; border: 0; border-radius: 8px; padding: 6px 8px; transition: background .2s; }
+.ac button:hover, .ac button:focus-visible { background: var(--pink-soft); }
+.ac .t, .picked .t { display: block; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ac .s, .picked .s { display: block; color: var(--muted); font-size: 12.5px; }
+.ac .free { border-top: 1px solid var(--line); border-radius: 0 0 8px 8px; }
+.picked { display: grid; grid-template-columns: 48px minmax(0,1fr) auto; gap: 14px; align-items: center; border: 1px solid var(--pink-line); border-radius: 12px; padding: 8px 12px; background: linear-gradient(165deg, color-mix(in srgb, var(--sakura) 10%, var(--surface)), var(--surface) 70%); animation: rise .4s var(--ease); }
+.player iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+/* Lautstärke */
+.vol { display: flex; align-items: center; gap: 10px; padding: 10px 4px 0; color: var(--sakura); font-size: 13px; }
+.vol .num { min-width: 44px; color: var(--fg); }
+.vol input[type=range] { flex: 1; max-width: 320px; height: 22px; background: transparent; -webkit-appearance: none; appearance: none; cursor: pointer; }
+.vol input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 6px; background: linear-gradient(90deg, var(--op), var(--sakura) var(--v), var(--line) var(--v)); }
+.vol input[type=range]::-moz-range-track { height: 6px; border-radius: 6px; background: linear-gradient(90deg, var(--op), var(--sakura) var(--v), var(--line) var(--v)); }
+.vol input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -5px; border-radius: 50%; background: #fff; border: 3px solid var(--op); box-shadow: 0 0 0 4px var(--pink-soft); transition: transform .15s var(--ease); }
+.vol input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 3px solid var(--op); }
+.vol input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.2); }
+.vol .chip { padding: 2px 10px; font-size: 12px; }
+.vol .capped { color: var(--muted); font-size: 12px; }
+
+/* Eigene Turniergröße */
+.size.custom { display: grid; gap: 2px; cursor: text; }
+.size.custom input { width: 84px; background: transparent; border: 0; padding: 0; color: var(--fg); font-family: var(--font-display); font-size: 28px; line-height: 1; -moz-appearance: textfield; }
+.size.custom input:focus { outline: none; }
+.size.custom:focus-within { border-color: var(--sakura); box-shadow: 0 0 0 4px var(--pink-soft); }
+.size.custom[aria-pressed="true"] { border-color: var(--op); box-shadow: inset 0 0 0 1px var(--op), 0 10px 24px -14px var(--op); }
+
+/* Video hochladen */
+.upl { display: grid; grid-template-columns: auto minmax(0,1fr) auto auto; gap: 12px; align-items: center; border: 1px dashed var(--pink-line); border-radius: 12px; padding: 12px 14px; color: var(--sakura); background: var(--surface); transition: border-color .2s, background .25s; }
+.upl:hover, .upl.drag { border-color: var(--sakura); background: var(--pink-soft); }
+.upl.has { border-style: solid; background: linear-gradient(165deg, color-mix(in srgb, var(--sakura) 10%, var(--surface)), var(--surface) 70%); }
+.upl .t { color: var(--fg); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.upl .s { color: var(--muted); font-size: 12.5px; }
+
+/* Animationen */
+.rise { animation: rise .5s var(--ease) both; animation-delay: calc(min(var(--i, 0), 16) * 35ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ring { from { transform: scale(1); opacity: .8; } to { transform: scale(1.6); opacity: 0; } }
+@keyframes pulse { 50% { color: var(--op); transform: scale(1.08); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@keyframes fall { 0% { transform: translate3d(0, -5vh, 0) rotate(0deg); } 50% { transform: translate3d(6vw, 50vh, 0) rotate(200deg); } 100% { transform: translate3d(-2vw, 110vh, 0) rotate(420deg); } }
+@keyframes burst { from { transform: translate(0,0) rotate(0); opacity: 1; } to { transform: translate(var(--x), var(--y)) rotate(540deg); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } .petals { display: none; } }
+</style>
+</head>
+<body>
+<div class="petals" id="petals" aria-hidden="true"></div>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#" aria-label="Sakuga, zur Startseite">
+      <svg class="bloom" viewBox="-12 -12 24 24" aria-hidden="true"><g fill="currentColor"><path id="pt" d="M0 -1 C -4 -4 -4 -9 -1.5 -11 L 0 -9 L 1.5 -11 C 4 -9 4 -4 0 -1Z"/><use href="#pt" transform="rotate(72)"/><use href="#pt" transform="rotate(144)"/><use href="#pt" transform="rotate(216)"/><use href="#pt" transform="rotate(288)"/></g><circle r="1.8" fill="#ff5a8c"/></svg>
+      <b>Sakuga</b><small>作画</small>
+    </a>
+    <label class="searchbox">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input id="q" type="search" autocomplete="off" placeholder="Anime, Song oder Artist suchen…" aria-label="Suche">
+      <span class="spin" id="spin" hidden></span>
+    </label>
+    <nav class="tabs" aria-label="Bereiche">
+      <a href="#suche" data-tab="search">Suche</a>
+      <a href="#turnier" data-tab="tournament">Turnier</a>
+      <a href="#neu" data-tab="new" title="Fehlenden Song selbst eintragen">+ Eintragen</a>
+      <button type="button" class="lang" id="lang" title="Anime-Titel auf Romaji oder Englisch anzeigen"></button>
+      <a href="#einstellungen" data-tab="settings" class="gear" title="Einstellungen" aria-label="Einstellungen"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></a>
+    </nav>
+  </div>
+</header>
+<main id="app"></main>
+<footer class="wrap">Songs, Credits und Videos von <a href="https://anisongdb.com" target="_blank" rel="noopener">AnisongDB</a>, Ersatzvideos von <a href="https://animethemes.moe" target="_blank" rel="noopener">AnimeThemes.moe</a>, Cover von <a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>. Eigene Cover bleiben nur in diesem Browser gespeichert. Cover-Import und Sicherungen findest du in den <a href="#einstellungen">Einstellungen</a>.</footer>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+
+
+/* =========================================================
+   Daten: AnisongDB für Songs und Credits, Videos in bester Qualität von
+   AnimeThemes (sonst AMQ über AnisongDB), Cover und Farben von AniList.
+   Alles direkt aus dem Browser, ohne großen Download vorab.
+   ========================================================= */
+
+const ANISONGDB = "https://anisongdb.com/api";
+const AMQ_MEDIA = "https://naedist.animemusicquiz.com/"; // AnisongDB liefert Videos teils nur als Dateinamen
+const API = "https://api.animethemes.moe";
+const ANILIST = "https://graphql.anilist.co";
+const CACHE_HOURS = 6;
+
+// Vergleichsschlüssel für Titel: klein, ohne Akzente und Satzzeichen
+const normKey = s => s.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+
+const SEASONS = ["Winter", "Spring", "Summer", "Fall"];
+const SEASON_DE = { Winter: "Winter", Spring: "Frühling", Summer: "Sommer", Fall: "Herbst" };
+
+// Werden Include-Pfade abgelehnt (400/422), probieren wir die nächste, kleinere Variante.
+const THEME_INCLUDES = [
+  ["anime.images", "anime.resources", "anime.studios", "song.artists", "animethemeentries.videos"],
+  ["anime.images", "anime.resources", "anime.studios", "song.performances.artist", "animethemeentries.videos"],
+  ["anime.images", "song", "animethemeentries.videos"],
+];
+const ANIME_INCLUDES = THEME_INCLUDES.map(set =>
+  set.map(p => (p.startsWith("anime.") ? p.slice(6) : "animethemes." + p)).concat("animethemes"));
+
+class NotFound extends Error {}
+class Unreachable extends Error {}
+class Paused extends Error {} // AnisongDB sperrt die Textsuche, während bei AMQ Ranked läuft
+
+const memory = new Map();
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) {
+    const s = JSON.stringify(v);
+    try { localStorage.setItem(k, s); return true; } catch { /* voll oder gesperrt */ }
+    prune();
+    try { localStorage.setItem(k, s); return true; } catch { return false; }
+  },
+};
+
+/** Wirft die ältere Hälfte der zwischengespeicherten API-Antworten weg, wenn localStorage voll ist. */
+function prune() {
+  try {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith("sakuga.c:"));
+    keys.map(k => [k, store.get(k, { t: 0 }).t]).sort((a, b) => a[1] - b[1])
+      .slice(0, Math.ceil(keys.length / 2)).forEach(([k]) => localStorage.removeItem(k));
+  } catch {}
+}
+
+/** Holt JSON mit Zwischenspeicher (Arbeitsspeicher, kleine Antworten auch in localStorage). */
+async function cachedJson(url, init, signal) {
+  const key = "sakuga.c:" + url + (init?.body ?? "");
+  if (memory.has(key)) return memory.get(key);
+  const hit = store.get(key, null);
+  if (hit && Date.now() - hit.t < CACHE_HOURS * 3600e3) { memory.set(key, hit.d); return hit.d; }
+  let res;
+  try {
+    res = await fetch(url, { ...init, signal });
+  } catch (e) {
+    if (e.name === "AbortError") throw e;
+    throw new Unreachable(url);
+  }
+  if (!res.ok) return { __status: res.status };
+  const text = await res.text();
+  const data = JSON.parse(text);
+  memory.set(key, data);
+  if (text.length < 400e3) store.set(key, { t: Date.now(), d: data });
+  return data;
+}
+
+async function firstOk(urls, signal) {
+  let last = 0;
+  for (const url of urls) {
+    const r = await cachedJson(url, { headers: { Accept: "application/json" } }, signal);
+    if (!r.__status) return r;
+    last = r.__status;
+    if (last === 404) throw new NotFound(url);
+    if (last !== 400 && last !== 422) break;
+  }
+  throw new Error("AnimeThemes antwortet mit Status " + last);
+}
+
+const qs = params => Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "")
+  .map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
+
+function normSeason(s) {
+  if (!s) return null;
+  const cap = s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+  return SEASONS.includes(cap) ? cap : null;
+}
+
+function currentSeason(now = new Date()) { return { year: now.getFullYear(), season: SEASONS[Math.floor(now.getMonth() / 3)] }; }
+
+/* ---------- AniList: Cover, Farben ---------- */
+
+// AniList-ID -> { v, c: Cover, k: Farbe, r: Romaji-Titel, e: englischer Titel }. Bleibt gespeichert, Cover ändern sich kaum.
+// Dazu "m<MAL-ID>" und "n<ANN-ID>" -> { a: AniList-ID } für Anime, die AnisongDB ohne AniList-ID liefert.
+const ANI_V = 2;
+const ANI_INFO = store.get("sakuga.anilist", {});
+const aniPending = new Map();
+const aniKnown = id => ANI_INFO[id]?.v === ANI_V;
+
+function applyAni(a) {
+  if (!a.anilistId) {
+    const viaMal = a.malId && ANI_INFO["m" + a.malId], viaName = a.annId && ANI_INFO["n" + a.annId];
+    a.anilistId = viaMal?.a || viaName?.a || null;
+  }
+  const i = ANI_INFO[a.anilistId];
+  if (!i) return a;
+  a.cover ||= i.c || null;
+  a.color ||= i.k || null;
+  // AnisongDB nennt Staffeln oft nur beim Grundnamen („Jujutsu Kaisen“). AniList hat den Namen der Staffel.
+  if (a.src === "db" && i.r && a.name !== i.r) {
+    a.alt = [...new Set([...(a.alt || []), a.name, a.nameEn].filter(Boolean))];
+    a.name = i.r;
+    a.nameEn = i.e && i.e !== i.r ? i.e : null;
+  } else if (a.src === "at") a.nameEn ||= i.e || null;
+  return a;
+}
+
+const aniPost = (query, variables, signal) => fetch(ANILIST, { method: "POST", signal, headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ query, variables }) })
+  .then(r => r.ok ? r.json() : null);
+
+/** Findet die AniList-ID für Anime ohne Verknüpfung: erst über die MAL-ID, sonst über Name, Season und Jahr. */
+async function findAniIds(animes, signal) {
+  const mal = [...new Set(animes.filter(a => !a.anilistId && a.malId && !ANI_INFO["m" + a.malId]).map(a => a.malId))];
+  for (let i = 0; i < mal.length; i += 50) {
+    const part = mal.slice(i, i + 50);
+    const json = await aniPost("query($ids:[Int]){Page(perPage:50){media(idMal_in:$ids,type:ANIME){id idMal}}}", { ids: part }, signal);
+    if (!json) continue;
+    const found = new Map((json.data?.Page?.media || []).map(m => [m.idMal, m.id]));
+    part.forEach(id => ANI_INFO["m" + id] = { a: found.get(id) || null });
+  }
+  animes.forEach(applyAni);
+  // Ohne MAL-ID: Suche nach Name in derselben Season. Höchstens 6 Anfragen auf einmal, AniList hat ein Limit.
+  const rest = animes.filter(a => !a.anilistId && a.annId && !ANI_INFO["n" + a.annId]).slice(0, 6);
+  for (const a of rest) {
+    const json = await aniPost("query($q:String,$y:Int,$s:MediaSeason){Page(perPage:5){media(search:$q,seasonYear:$y,season:$s,type:ANIME){id}}}",
+      { q: a.nameEn || a.name, y: a.year || undefined, s: a.season ? a.season.toUpperCase() : undefined }, signal);
+    if (json) ANI_INFO["n" + a.annId] = { a: json.data?.Page?.media?.[0]?.id || null };
+  }
+  animes.forEach(applyAni);
+}
+
+/** Fragt AniList nach allen noch unbekannten IDs, in Paketen zu 50. Fehler ändern nichts. */
+async function loadAniList(animes, signal) {
+  if (animes.some(a => !a.anilistId)) await findAniIds(animes, signal).catch(e => { if (e.name === "AbortError") throw e; });
+  const ids = [...new Set(animes.map(a => a.anilistId).filter(id => id && !aniKnown(id)))];
+  for (let i = 0; i < ids.length; i += 50) {
+    const batch = ids.slice(i, i + 50).filter(id => !aniPending.has(id));
+    if (!batch.length) continue;
+    const job = (async () => {
+      const res = await fetch(ANILIST, { method: "POST", signal, headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({
+        query: "query($ids:[Int]){Page(perPage:50){media(id_in:$ids,type:ANIME){id title{romaji english} coverImage{large color}}}}", variables: { ids: batch } }) });
+      if (!res.ok) return;
+      const json = await res.json();
+      const found = new Map((json.data?.Page?.media || []).map(m => [m.id, m]));
+      for (const id of batch) {
+        const m = found.get(id);
+        ANI_INFO[id] = m ? { v: ANI_V, c: m.coverImage?.large || null, k: m.coverImage?.color || null, r: m.title?.romaji || null, e: m.title?.english || null } : { v: ANI_V };
+      }
+      store.set("sakuga.anilist", ANI_INFO);
+    })().catch(e => { if (e.name === "AbortError") throw e; }).finally(() => batch.forEach(id => aniPending.delete(id)));
+    batch.forEach(id => aniPending.set(id, job));
+  }
+  await Promise.all(ids.map(id => aniPending.get(id)).filter(Boolean)).catch(() => {});
+  animes.forEach(applyAni);
+}
+
+/* ---------- AnisongDB ---------- */
+
+const SONG_TYPES = { all: ["opening", "ending"], OP: ["opening"], ED: ["ending"], IN: ["insert"] };
+const dbFilters = (type, season) => ({ song_types: SONG_TYPES[type] || SONG_TYPES.all, broadcasts: ["normal"], ...(season ? { season } : {}) });
+const mediaUrl = f => !f ? null : /^https?:\/\//.test(f) ? f : AMQ_MEDIA + String(f).replace(/^\//, "");
+
+async function songdb(path, body, signal) {
+  const r = await cachedJson(`${ANISONGDB}/${path}`, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(body) }, signal);
+  if (r?.__status === 503) throw new Paused(path);
+  if (r?.__status) throw new Error("AnisongDB antwortet mit Status " + r.__status);
+  return Array.isArray(r) ? r : [];
+}
+
+// Ein Objekt pro Anime, damit Cover und Titel überall gleichzeitig nachziehen.
+const animeCache = new Map();
+
+function toDbAnime(r) {
+  const key = "a" + r.annId;
+  let a = animeCache.get(key);
+  if (a) return a;
+  const m = /^(\w+)\s+(\d{4})/.exec(r.animeVintage || "");
+  const en = (r.animeENName || "").trim(), jp = (r.animeJPName || "").trim();
+  a = {
+    key, src: "db", annId: r.annId, slug: "",
+    name: jp || en || "Unbekannter Anime", nameEn: en && en !== jp ? en : null, dbName: jp || en || "",
+    alt: r.animeAltName || [],
+    year: m ? +m[2] : null, season: m ? normSeason(m[1]) : null,
+    cover: null, color: null, studios: [],
+    anilistId: r.linked_ids?.anilist || null, malId: r.linked_ids?.myanimelist || null,
+    format: r.animeType || null,
+  };
+  animeCache.set(key, applyAni(a));
+  return a;
+}
+
+function toDbSong(r) {
+  const m = /^(opening|ending)\s*(\d+)?/i.exec(r.songType || "");
+  const type = m ? (m[1][0].toLowerCase() === "o" ? "OP" : "ED") : "IN";
+  const sequence = m?.[2] ? +m[2] : null;
+  const hq = mediaUrl(r.HQ), mq = mediaUrl(r.MQ);
+  return {
+    id: String(r.annSongId), src: "db", type, sequence,
+    slug: type === "IN" ? "IN" : type + (sequence ?? ""),
+    song: { title: (r.songName || "").trim() || "Unbekannter Titel" },
+    artists: r.songArtist ? [{ name: r.songArtist, as: null }] : [],
+    composer: r.songComposer || null, arranger: r.songArranger || null,
+    category: r.songCategory || null, length: r.songLength || null,
+    anime: toDbAnime(r), episodes: null,
+    video: hq || mq ? { link: hq || mq, resolution: hq ? 720 : 480, nc: false, source: null, from: "AMQ" } : replacedVideo(String(r.annSongId)),
+    audio: mediaUrl(r.audio),
+  };
+}
+
+const animeOrder = (a, b) => animeTitle(a.anime).localeCompare(animeTitle(b.anime))
+  || ["OP", "ED", "IN"].indexOf(a.type) - ["OP", "ED", "IN"].indexOf(b.type) || (a.sequence || 0) - (b.sequence || 0);
+
+function seasonRange(query) {
+  if (!query.year) return null;
+  const s = SEASONS.includes(query.season) ? query.season : null;
+  return { start: `${s || "Winter"} ${query.year}`, end: `${s || "Fall"} ${query.year}` };
+}
+
+async function dbSearch(q, query, signal) {
+  const text = { search: q, partial_match: true, match_case: false };
+  return (await songdb("search_request", {
+    anime_search_filter: text, song_name_search_filter: text,
+    artist_search_filter: { ...text, group_granularity: 0, max_other_artist: 99 },
+    and_logic: false, ignore_duplicate: false, filters: dbFilters(query.type, seasonRange(query)),
+  }, signal)).map(toDbSong);
+}
+
+/** Suche über Anime, Songtitel und Artist. Mehrere Wörter („frieren yoasobi“) gehen auch. */
+async function searchSongs(q, query, signal) {
+  let songs = await dbSearch(q, query, signal);
+  const terms = normKey(q).split(" ").filter(Boolean);
+  if (!songs.length && terms.length > 1) {
+    const longest = [...terms].sort((a, b) => b.length - a.length)[0];
+    songs = rank(await dbSearch(longest, query, signal), q, true);
+    return songs;
+  }
+  return rank(songs, q, false);
+}
+
+async function seasonSongs(year, season, type, signal) {
+  // Ganzes Jahr: nur Seasons bis heute. Fehlt eine davon bei AnisongDB noch (z. B. die laufende), zeigen wir den Rest.
+  const cur = currentSeason();
+  const list = season ? [season] : SEASONS.filter(s => year < cur.year || SEASONS.indexOf(s) <= SEASONS.indexOf(cur.season));
+  const parts = await Promise.allSettled(list.map(s =>
+    songdb("season_request", { season: `${s} ${year}`, filters: dbFilters(type), ignore_duplicate: false }, signal)));
+  const ok = parts.filter(p => p.status === "fulfilled");
+  if (!ok.length) throw parts[0]?.reason || new Unreachable();
+  return ok.flatMap(p => Array.isArray(p.value) ? p.value : []).map(toDbSong).sort(animeOrder);
+}
+
+async function dbSongById(id, signal) {
+  const rows = await songdb("ann_song_ids_request", { ann_song_ids: [+id], ignore_duplicate: false }, signal);
+  return rows[0] ? toDbSong(rows[0]) : null;
+}
+
+async function dbSongsOfAnime(annId, signal) {
+  const rows = await songdb("ann_ids_request", { ann_ids: [annId], filters: { song_types: ["opening", "ending", "insert"], broadcasts: ["normal"] }, ignore_duplicate: false }, signal);
+  return rows.map(toDbSong).sort(animeOrder);
+}
+
+/* ---------- Weitere Staffeln, Filme und OVAs (Verwandtschaft von AniList) ---------- */
+
+const REL_FOLLOW = new Set(["PREQUEL", "SEQUEL", "PARENT", "SIDE_STORY"]);
+
+/** Alle über Vorgänger, Nachfolger und Ableger verbundenen Anime, höchstens 5 AniList-Anfragen. Eine Woche gespeichert. */
+async function franchiseOf(anilistId) {
+  const key = "sakuga.f2:" + anilistId;
+  const hit = store.get(key, null);
+  if (hit && Date.now() - hit.t < 7 * 864e5) return hit.d;
+  const found = new Map(), visited = new Set();
+  let frontier = [anilistId];
+  for (let depth = 0; depth < 5 && frontier.length && found.size < 40; depth++) {
+    frontier.forEach(id => visited.add(id));
+    const res = await fetch(ANILIST, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({
+      query: "query($ids:[Int]){Page(perPage:50){media(id_in:$ids,type:ANIME){id idMal format season seasonYear relations{edges{relationType node{id type}}}}}}",
+      variables: { ids: frontier.slice(0, 50) } }) });
+    if (!res.ok) { if (!found.size) throw new Error("AniList " + res.status); break; }
+    const next = [];
+    for (const m of (await res.json()).data?.Page?.media || []) {
+      found.set(m.id, { id: m.id, mal: m.idMal || null, year: m.seasonYear || null, season: normSeason(m.season), format: m.format || null });
+      for (const e of m.relations?.edges || [])
+        if (e.node?.type === "ANIME" && REL_FOLLOW.has(e.relationType) && !visited.has(e.node.id) && !next.includes(e.node.id)) next.push(e.node.id);
+    }
+    frontier = next;
+  }
+  const d = [...found.values()];
+  store.set(key, { t: Date.now(), d });
+  return d;
+}
+
+/**
+ * Staffeln, die AnisongDB ohne AniList- und MAL-Verknüpfung führt (oft die neuesten), über den Namen suchen.
+ * Gesucht wird mit dem kürzesten AnisongDB-Namen der Reihe („SPY x FAMILY“) und nur in der Season der fehlenden Staffel.
+ */
+async function franchiseGaps(rel, songs, current) {
+  const have = new Set([current.anilistId, ...songs.map(x => x.anime.anilistId)]);
+  const missing = rel.filter(r => !have.has(r.id) && r.year && r.format !== "MUSIC").slice(0, 4);
+  const base = [current, ...songs.map(x => x.anime)].map(a => a.dbName).filter(Boolean).sort((x, y) => x.length - y.length)[0];
+  if (!missing.length || !base) return [];
+  const text = { search: base, partial_match: true, match_case: false };
+  const out = [];
+  for (const r of missing) {
+    const season = r.season ? { start: `${r.season} ${r.year}`, end: `${r.season} ${r.year}` } : { start: `Winter ${r.year}`, end: `Fall ${r.year}` };
+    let rows;
+    try { rows = await songdb("search_request", { anime_search_filter: text, and_logic: false, ignore_duplicate: false, filters: { song_types: ["opening", "ending", "insert"], broadcasts: ["normal"], season } }); }
+    catch { continue; }
+    const hits = rows.map(toDbSong).filter(x => x.anime.year === r.year && (!r.season || x.anime.season === r.season) && (!x.anime.anilistId || x.anime.anilistId === r.id));
+    for (const x of hits) {
+      if (!x.anime.anilistId) { x.anime.anilistId = r.id; ANI_INFO["n" + x.anime.annId] = { a: r.id }; }
+      if (r.mal) x.anime.malId ||= r.mal;
+    }
+    out.push(...hits);
+  }
+  if (out.length) store.set("sakuga.anilist", ANI_INFO);
+  return out;
+}
+
+async function dbSongsByMal(malIds, signal) {
+  const rows = await songdb("mal_ids_request", { mal_ids: malIds.slice(0, 500), filters: { song_types: ["opening", "ending", "insert"], broadcasts: ["normal"] }, ignore_duplicate: false }, signal);
+  return rows.map(toDbSong);
+}
+
+/* ---------- Trefferliste sortieren ---------- */
+
+function hay(t) {
+  const a = t.anime;
+  return (t._hay ||= {
+    song: normKey(t.song.title),
+    artist: normKey(t.artists.map(x => x.name).join(" ")),
+    anime: normKey(`${a.name} ${a.nameEn || ""} ${(a.alt || []).join(" ")} ${(a.slug || "").replace(/_/g, " ")}`),
+  });
+}
+
+/** Bewertet Treffer wie eine gute Suche: genauer Titel vor Wortanfang vor Teilwort. strict: alle Wörter müssen passen. */
+function rank(themes, q, strict) {
+  const terms = normKey(q).split(" ").filter(Boolean);
+  const words = s => s.split(" ");
+  const out = [];
+  for (const t of themes) {
+    const h = hay(t);
+    let score = 0, all = true;
+    for (const term of terms) {
+      let best = 0;
+      if (h.song === term) best = 9; else if (h.song.startsWith(term)) best = 7; else if (words(h.song).some(w => w.startsWith(term))) best = 5; else if (h.song.includes(term)) best = 3;
+      if (h.anime.startsWith(term)) best = Math.max(best, 6); else if (words(h.anime).some(w => w.startsWith(term))) best = Math.max(best, 5); else if (h.anime.includes(term)) best = Math.max(best, 3);
+      if (h.artist === term) best = Math.max(best, 8); else if (words(h.artist).some(w => w.startsWith(term))) best = Math.max(best, 5); else if (h.artist.includes(term)) best = Math.max(best, 3);
+      if (!best) all = false;
+      score += best;
+    }
+    if (strict && !all) continue;
+    out.push([score + (all ? 2 : 0), t]);
+  }
+  out.sort((a, b) => b[0] - a[0] || (b[1].anime.year || 0) - (a[1].anime.year || 0) || (a[1].sequence || 0) - (b[1].sequence || 0));
+  return out.map(x => x[1]);
+}
+
+/* ---------- AnimeThemes: Videos in 1080p, und Ersatz, falls AnisongDB nicht antwortet ---------- */
+
+function toAnime(a) {
+  const images = a.images || [];
+  const cover = images.find(i => (i.facet || "").toLowerCase().includes("large"))?.link || images[0]?.link || null;
+  const anilist = (a.resources || []).find(r => (r.site || "").toLowerCase() === "anilist")?.external_id || null;
+  return applyAni({
+    key: "s" + (a.slug || ""), src: "at", slug: a.slug || "", name: a.name || "Unbekannter Anime", nameEn: null, alt: [],
+    year: a.year || null, season: normSeason(a.season), cover, color: null,
+    studios: (a.studios || []).map(s => s.name).filter(Boolean), anilistId: anilist, malId: null, format: null,
+  });
+}
+
+function toArtists(song) {
+  if (!song) return [];
+  if (song.artists?.length) return song.artists.filter(a => a.name).map(a => ({ name: a.name, as: a.as ?? a.artistsong?.as ?? null }));
+  return (song.performances || []).filter(p => p.artist?.name).map(p => ({ name: p.alias || p.artist.name, as: p.as ?? null }));
+}
+
+function bestVideo(entries) {
+  const videos = entries.flatMap(e => e.videos || []).filter(v => v.link);
+  if (!videos.length) return null;
+  // Höchste Auflösung gewinnt; bei gleicher Auflösung die Version ohne Credits und ohne Überblendung.
+  const score = v => (v.resolution || 0) * 10 + (v.nc ? 4 : 0) + (v.overlap && v.overlap !== "None" ? 0 : 2);
+  const v = [...videos].sort((a, b) => score(b) - score(a))[0];
+  return { link: v.link, resolution: v.resolution || null, nc: !!v.nc, source: v.source || null, from: "AnimeThemes" };
+}
+
+function toTheme(t, anime, song = t.song) {
+  const type = (t.type || "OP").toUpperCase();
+  const entries = t.animethemeentries || [];
+  const title = (song?.title || "").trim() || "Unbekannter Titel";
+  return {
+    id: "t" + t.id, src: "at", type: type === "ED" || type === "IN" ? type : "OP", sequence: t.sequence ?? null,
+    slug: t.slug || type + (t.sequence ?? ""),
+    song: { title },
+    artists: toArtists(song), anime,
+    episodes: entries[0]?.episodes || null,
+    video: bestVideo(entries),
+  };
+}
+
+const themesOfAnime = a => { const anime = toAnime(a); return (a.animethemes || []).map(t => toTheme(t, anime)); };
+const dedupe = themes => { const seen = new Set(); return themes.filter(t => !seen.has(t.id) && seen.add(t.id)); };
+
+async function searchThemes(q, signal) {
+  const base = f => `${API}/search?${qs({ q, "fields[search]": f })}`;
+  const [byTheme, byAnime, byArtist] = await Promise.allSettled([
+    firstOk(THEME_INCLUDES.map(inc => `${base("animethemes")}&${qs({ "include[animetheme]": inc.join(","), "page[limit]": 25 })}`), signal),
+    firstOk(ANIME_INCLUDES.map(inc => `${base("anime")}&${qs({ "include[anime]": inc.join(","), "page[limit]": 6 })}`), signal),
+    firstOk([`${base("artists")}&${qs({ "include[artist]": "songs.animethemes.anime.images,songs.animethemes.anime.resources,songs.animethemes.animethemeentries.videos", "page[limit]": 4 })}`], signal),
+  ]);
+  const all = [byTheme, byAnime, byArtist];
+  const abort = all.find(r => r.status === "rejected" && r.reason?.name === "AbortError");
+  if (abort) throw abort.reason;
+  if (all.every(r => r.status === "rejected")) throw byTheme.reason;
+
+  const themes = [];
+  if (byTheme.status === "fulfilled") for (const t of byTheme.value.search?.animethemes || []) if (t.anime) themes.push(toTheme(t, toAnime(t.anime)));
+  if (byAnime.status === "fulfilled") for (const a of byAnime.value.search?.anime || []) themes.push(...themesOfAnime(a));
+  if (byArtist.status === "fulfilled") {
+    for (const artist of byArtist.value.search?.artists || [])
+      for (const song of artist.songs || [])
+        for (const t of song.animethemes || []) if (t.anime) themes.push(toTheme(t, toAnime(t.anime), { ...song, artists: [artist] }));
+  }
+  return dedupe(themes);
+}
+
+async function seasonThemes(year, season, signal) {
+  const themes = [];
+  for (let page = 1; page <= 8; page++) {
+    const res = await firstOk(ANIME_INCLUDES.map(inc => `${API}/anime?${qs({
+      "filter[year]": year, "filter[season]": season || undefined, include: inc.join(","),
+      sort: "name", "page[size]": 50, "page[number]": page,
+    })}`), signal);
+    themes.push(...(res.anime || []).flatMap(themesOfAnime));
+    if (!res.links?.next) break;
+  }
+  return themes;
+}
+
+async function themeById(id, signal) {
+  try {
+    const res = await firstOk(THEME_INCLUDES.map(inc => `${API}/animetheme/${id}?${qs({ include: inc.join(",") })}`), signal);
+    const t = res.animetheme;
+    return t?.anime ? toTheme(t, toAnime(t.anime)) : null;
+  } catch (e) { if (e instanceof NotFound) return null; throw e; }
+}
+
+async function themesByAnime(slug, signal) {
+  try {
+    const res = await firstOk(ANIME_INCLUDES.map(inc => `${API}/anime/${encodeURIComponent(slug)}?${qs({ include: inc.join(",") })}`), signal);
+    return themesOfAnime(res.anime || {});
+  } catch (e) { if (e instanceof NotFound) return []; throw e; }
+}
+
+// AniList- oder MAL-ID -> Songs dieses Anime auf AnimeThemes (als Promise, jede ID nur einmal gefragt)
+const atByAnime = new Map();
+
+function animeThemesFor(a) {
+  const id = a.anilistId || a.malId;
+  if (!id) return Promise.resolve([]);
+  const k = (a.anilistId ? "ani" : "mal") + id;
+  if (!atByAnime.has(k)) {
+    const site = a.anilistId ? "AniList" : "MyAnimeList";
+    atByAnime.set(k, firstOk(ANIME_INCLUDES.map(inc => `${API}/anime?${qs({ "filter[has]": "resources", "filter[site]": site, "filter[external_id]": id, include: inc.join(",") })}`))
+      .then(res => (res.anime || []).flatMap(themesOfAnime))
+      .catch(() => { atByAnime.delete(k); return []; }));
+  }
+  return atByAnime.get(k);
+}
+
+/** Sucht denselben Song auf AnimeThemes: für Studio und Folgen, und als Video-Ersatz, wenn AnisongDB keins hat. */
+async function upgradeVideo(t) {
+  if (t.src !== "db" || t.upgraded) return t;
+  const list = await animeThemesFor(t.anime);
+  t.upgraded = true;
+  const title = normKey(t.song.title);
+  const same = list.filter(x => x.type === t.type);
+  const seq = x => x.sequence ?? 1;
+  const match = same.filter(x => normKey(x.song.title) === title).sort((a, b) => Math.abs(seq(a) - (t.sequence ?? 1)) - Math.abs(seq(b) - (t.sequence ?? 1)))[0]
+    || (t.type !== "IN" ? same.find(x => seq(x) === (t.sequence ?? 1)) : null);
+  if (match?.video) { t.atVideo = match.video; t.video ||= match.video; }
+  if (match) t.episodes ||= match.episodes;
+  const at = list[0]?.anime;
+  if (at) { t.anime.studios = t.anime.studios.length ? t.anime.studios : at.studios; t.anime.slug ||= at.slug; t.anime.cover ||= at.cover; }
+  return t;
+}
+
+/* ---------- Suche oder Season-Liste ---------- */
+
+async function findThemes(query, signal) {
+  const q = query.q.trim();
+  const cur = currentSeason();
+  const year = query.year || cur.year;
+  // "now" (Start): laufende Season. "all": ganzes Jahr. Bei einer Textsuche gilt beides als „keine Season“.
+  const s = SEASONS.includes(query.season) ? query.season : (query.season === "now" && !query.year && !q ? cur.season : null);
+  const scope = q ? `Suche nach „${q}“`
+    : s ? `${s === cur.season && year === cur.year ? "Aktuelle Season · " : ""}${SEASON_DE[s]} ${year}` : `Jahr ${year}`;
+  let themes, source = "db";
+  try {
+    themes = q ? await searchSongs(q, query, signal) : await seasonSongs(year, s, query.type, signal);
+    await withAni(themes);
+    replaceFrom(themes);
+  } catch (e) {
+    if (e.name === "AbortError" || !(e instanceof Paused || e instanceof Unreachable)) throw e;
+    // AnisongDB pausiert gerade (AMQ Ranked) oder antwortet nicht: AnimeThemes springt ein.
+    source = e instanceof Paused ? "paused" : "down";
+    themes = q ? await searchThemes(q, signal) : await seasonThemes(year, s, signal);
+    if (!q) themes.sort(animeOrder);
+  }
+  const mine = customSongs().filter(t => q ? rank([t], q, true).length : t.anime.year === year && (!s || t.anime.season === s));
+  themes = q ? [...mine, ...themes] : [...mine, ...themes].sort(animeOrder);
+  themes = themes.filter(t =>
+    (query.type === "all" ? t.type !== "IN" : t.type === query.type) &&
+    (!SEASONS.includes(query.season) || t.anime.season === query.season) &&
+    (!query.year || t.anime.year === query.year));
+  return { themes, scope, source };
+}
+
+/* ---------- Eigene Songs: von Hand eingetragen, bis AnisongDB sie kennt ---------- */
+
+// [{ id, type, sequence, title, artist, video, anime: { name, nameEn, anilistId, malId, year, season, format, cover, color }, checkedAt }]
+let CUSTOM = store.get("sakuga.custom", []);
+// Ersetzte eigene Songs: eigene ID -> { id: AnisongDB-ID, title, video }. Alte Links führen so zum offiziellen Song.
+const REPLACED = store.get("sakuga.replaced", {});
+const saveCustom = () => store.set("sakuga.custom", CUSTOM);
+
+/** YouTube öffnet ein eigenes Fenster, Streamable spielt in Sakuga, alles andere gilt als Videodatei. */
+function videoFromLink(url) {
+  if (url.startsWith("upload:")) return { kind: "upload", key: url.slice(7), link: url, from: "Hochgeladen" };
+  const yt = /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/.exec(url);
+  if (yt) return { kind: "youtube", yt: yt[1], link: url, from: "YouTube" };
+  const st = /streamable\.com\/(?:[eo]\/|s\/)?([a-z0-9]+)/i.exec(url);
+  if (st) return { kind: "streamable", code: st[1], link: url, from: "Streamable" };
+  return { kind: "file", link: url, from: "Eigener Link" };
+}
+
+// Hochgeladene Videos: Schlüssel -> Objekt-URL, solange die Seite offen ist
+const uploadUrls = new Map();
+async function uploadedUrl(key) {
+  if (uploadUrls.has(key)) return uploadUrls.get(key);
+  let blob;
+  try { blob = await idb.get("videos", key); } catch { return null; }
+  if (!blob) return null;
+  const url = URL.createObjectURL(blob);
+  uploadUrls.set(key, url);
+  return url;
+}
+
+/** Holt die direkte MP4-Adresse eines Streamable-Videos (läuft nach einiger Zeit ab, darum erst beim Abspielen). */
+async function streamableFile(code) {
+  try {
+    const ctrl = new AbortController(); setTimeout(() => ctrl.abort(), 4000);
+    const res = await fetch(`https://api.streamable.com/videos/${code}`, { signal: ctrl.signal });
+    if (!res.ok) return null;
+    const j = await res.json();
+    const f = j.files?.mp4 || j.files?.["mp4-high"] || j.files?.original || Object.values(j.files || {})[0];
+    const url = f?.url;
+    return url ? (url.startsWith("//") ? "https:" + url : url) : null;
+  } catch { return null; }
+}
+
+function replacedVideo(id) {
+  for (const r of Object.values(REPLACED)) if (r.id === id && r.video) return videoFromLink(r.video);
+  return null;
+}
+
+const customAnime = new Map();
+
+function toCustom(c) {
+  const k = "c:" + (c.anime.anilistId || normKey(c.anime.name));
+  let a = customAnime.get(k);
+  if (!a) customAnime.set(k, a = { key: k, src: "custom", slug: "", alt: [], studios: [], cover: null, color: null, nameEn: null, anilistId: null, malId: null, format: null });
+  Object.assign(a, c.anime);
+  applyAni(a);
+  return {
+    id: c.id, src: "custom", type: c.type, sequence: c.sequence || null,
+    slug: c.type === "IN" ? "IN" : c.type + (c.sequence ?? ""),
+    song: { title: c.title }, artists: c.artist ? [{ name: c.artist, as: null }] : [],
+    anime: a, episodes: null, video: c.video ? videoFromLink(normVideoPath(c.video)) : null,
+  };
+}
+
+const customSongs = () => CUSTOM.map(toCustom);
+
+function sameAnime(c, a) {
+  if (c.anime.anilistId && a.anilistId) return c.anime.anilistId === a.anilistId;
+  const theirs = [a.name, a.nameEn, ...(a.alt || [])].filter(Boolean).map(normKey);
+  const mine = [c.anime.name, c.anime.nameEn].filter(Boolean).map(normKey);
+  return mine.some(m => theirs.some(n => n === m || n.includes(m) || m.includes(n)));
+}
+
+/** Findet sich ein eigener Song in AnisongDB-Treffern, fliegt die eigene Version raus und die offizielle gilt. */
+function replaceFrom(songs) {
+  if (!CUSTOM.length) return;
+  const done = [];
+  CUSTOM = CUSTOM.filter(c => {
+    const hit = songs.find(t => t.src === "db" && t.type === c.type && normKey(t.song.title) === normKey(c.title) && sameAnime(c, t.anime));
+    if (!hit) return true;
+    REPLACED[c.id] = { id: hit.id, title: c.title, video: c.video || null };
+    if (!hit.video && c.video) hit.video = videoFromLink(c.video);
+    done.push(c);
+    return false;
+  });
+  if (!done.length) return;
+  saveCustom();
+  store.set("sakuga.replaced", REPLACED);
+  setTimeout(() => {
+    toast(done.length === 1 ? `„${done[0].title}“ ist jetzt auf AnisongDB, deine Version wurde ersetzt` : `${done.length} eigene Songs sind jetzt auf AnisongDB und wurden ersetzt`);
+    const r = route();
+    if ((r.view === "song" || r.view === "edit") && REPLACED[r.id]) location.replace("#song-" + REPLACED[r.id].id);
+  });
+}
+
+/** Fragt AnisongDB nach jedem eigenen Song, höchstens alle 6 Stunden pro Song. */
+async function checkCustom(force = false) {
+  for (const c of CUSTOM.filter(c => force || Date.now() - (c.checkedAt || 0) > 6 * 3600e3)) {
+    try {
+      const rows = await songdb("search_request", {
+        song_name_search_filter: { search: c.title, partial_match: false, match_case: false },
+        and_logic: true, ignore_duplicate: false, filters: dbFilters(c.type),
+      });
+      c.checkedAt = Date.now();
+      replaceFrom(rows.map(toDbSong));
+    } catch { break; } // AnisongDB pausiert oder antwortet nicht: beim nächsten Mal wieder
+  }
+  saveCustom();
+}
+
+/** Anime-Vorschläge von AniList für das Formular. */
+async function searchAniList(q, signal) {
+  const r = await cachedJson(ANILIST, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({
+    query: "query($q:String){Page(perPage:6){media(search:$q,type:ANIME,sort:SEARCH_MATCH){id idMal title{romaji english} season seasonYear format coverImage{large color}}}}",
+    variables: { q } }) }, signal);
+  return (r.data?.Page?.media || []).map(m => ({
+    name: m.title?.romaji || m.title?.english || q, nameEn: m.title?.english || null,
+    anilistId: m.id, malId: m.idMal || null, year: m.seasonYear || null, season: normSeason(m.season),
+    format: m.format || null, cover: m.coverImage?.large || null, color: m.coverImage?.color || null,
+  }));
+}
+
+/* ---------- Gespeicherte Daten im Browser: eigene Cover ---------- */
+
+const idb = {
+  db: null,
+  open() {
+    if (this.db) return this.db;
+    return (this.db = new Promise((res, rej) => {
+      const r = indexedDB.open("sakuga", 3);
+      r.onupgradeneeded = () => {
+        const d = r.result;
+        if (!d.objectStoreNames.contains("kv")) d.createObjectStore("kv");
+        if (!d.objectStoreNames.contains("covers")) d.createObjectStore("covers");
+        if (!d.objectStoreNames.contains("videos")) d.createObjectStore("videos"); // hochgeladene Videos eigener Songs
+      };
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+      r.onblocked = () => rej(new Error("blocked"));
+    }));
+  },
+  async get(name, key) {
+    let out;
+    await this.run(name, "readonly", st => { const q = st.get(key); q.onsuccess = () => { out = q.result; }; });
+    return out;
+  },
+  async run(name, mode, fn) {
+    const db = await this.open();
+    return new Promise((res, rej) => {
+      const tx = db.transaction(name, mode);
+      fn(tx.objectStore(name));
+      tx.oncomplete = () => res();
+      tx.onerror = tx.onabort = () => rej(tx.error);
+    });
+  },
+};
+
+// Eigene Cover: Schlüssel (AniList-ID, sonst Anime) -> Bild als data:-URL
+const COVERS = {};
+let coversInIdb = false;
+const coverKey = a => a.anilistId ? "ani" + a.anilistId : a.key;
+
+async function loadCovers() {
+  try {
+    await idb.run("covers", "readonly", st => {
+      const c = st.openCursor();
+      c.onsuccess = () => { const cur = c.result; if (cur) { COVERS[cur.key] = cur.value; cur.continue(); } };
+    });
+    coversInIdb = true;
+    idb.run("kv", "readwrite", st => st.delete("db")).catch(() => {}); // alte Komplett-Datenbank aufräumen
+  } catch {
+    Object.assign(COVERS, store.get("sakuga.covers", {}));
+  }
+}
+
+async function saveCover(key, dataUrl) {
+  if (dataUrl) COVERS[key] = dataUrl; else delete COVERS[key];
+  if (coversInIdb) {
+    try { await idb.run("covers", "readwrite", st => dataUrl ? st.put(dataUrl, key) : st.delete(key)); return true; } catch {}
+  }
+  return store.set("sakuga.covers", COVERS);
+}
+
+/** Verkleinert ein Bild vom PC auf Cover-Größe (max. 600×800) und gibt es als JPEG zurück. */
+async function fileToCover(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    const scale = Math.min(1, 600 / img.naturalWidth, 800 / img.naturalHeight);
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.naturalWidth * scale); c.height = Math.round(img.naturalHeight * scale);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL("image/jpeg", 0.9);
+  } finally { URL.revokeObjectURL(url); }
+}
+
+
+/* =========================================================
+   Oberfläche
+   ========================================================= */
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const prefs = Object.assign({ animeLang: "en", layout: "list", videoSource: "anisongdb", petals: true }, store.get("sakuga.prefs", {}));
+document.body.classList.toggle("calm", !prefs.petals);
+const savePrefs = () => store.set("sakuga.prefs", prefs);
+const songTitle = t => t.song.title;
+const animeTitle = a => (prefs.animeLang === "en" && a.nameEn) || a.name;
+const artistLine = t => t.artists.length ? t.artists.map(a => a.as ? `${a.name} (als ${a.as})` : a.name).join(", ") : "Unbekannter Artist";
+const seasonLabel = a => a.year ? (a.season ? `${SEASON_DE[a.season]} ${a.year}` : String(a.year)) : "";
+const typeCls = t => t.type.toLowerCase();
+const playIcon = s => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>`;
+
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.timer); toast.timer = setTimeout(() => (t.hidden = true), 1800);
+}
+
+async function copy(text, fallbackEl) {
+  try { await navigator.clipboard.writeText(text); toast("Kopiert"); }
+  catch { if (fallbackEl) { fallbackEl.focus(); fallbackEl.select(); toast("Text markiert, jetzt mit Strg+C kopieren"); } else toast("Kopieren nicht möglich"); }
+}
+
+/* ---------- Cover-Import, z. B. aus dem Backup des AniList-Studio-Skripts ---------- */
+
+// Nimmt fast jede Form: { "16498": "https://…" }, { "ani16498": … }, [{ id, cover }], { covers: … }.
+// Ein Cover darf ein Bildlink, ein data:-Bild, ein Pfad auf dem PC oder ein Objekt wie AniLists coverImage sein.
+function coverEntries(data) {
+  const out = [];
+  const idOf = x => { const m = /^(?:ani)?(\d+)$/.exec(String(x ?? "").trim()); return m ? +m[1] : null; };
+  const srcOf = v => {
+    if (v == null) return null;
+    if (typeof v === "object") return srcOf(v.url ?? v.cover ?? v.customCover ?? v.image ?? v.src ?? v.coverImage ?? v.extraLarge ?? v.large ?? v.medium);
+    const t = String(v).trim().replace(/^"|"$/g, "");
+    if (/^(https?:|data:image\/|file:|blob:)/i.test(t)) return t;
+    if (/^[a-z]:[\\/]/i.test(t) || t.startsWith("\\\\")) return "file:///" + t.replace(/\\/g, "/").replace(/^\/+/, "");
+    return null;
+  };
+  const walk = d => {
+    if (Array.isArray(d)) {
+      for (const x of d) {
+        if (!x || typeof x !== "object") continue;
+        const id = idOf(x.anilistId ?? x.anilist_id ?? x.mediaId ?? x.media_id ?? x.media?.id ?? x.id);
+        const src = srcOf(x.customCover ?? x.cover ?? x.url ?? x.image ?? x.src ?? x.coverImage);
+        if (id && src) out.push([id, src]);
+      }
+    } else if (d && typeof d === "object") {
+      const keys = Object.keys(d);
+      if (keys.some(k => idOf(k))) keys.forEach(k => { const id = idOf(k), src = srcOf(d[k]); if (id && src) out.push([id, src]); });
+      else keys.forEach(k => typeof d[k] === "object" && walk(d[k]));
+    }
+  };
+  // Backup aus dem AniList-Studio-Skript: entries["img:cover:<id>"] = { src, mediaType }
+  if (data?.app === "anilist-custom-images" && data.entries) {
+    for (const [k, v] of Object.entries(data.entries)) {
+      const m = /^img:cover:(\d+)$/.exec(k), src = m && v?.mediaType !== "manga" && srcOf(v?.src);
+      if (src) out.push([+m[1], src]);
+    }
+    return out;
+  }
+  walk(data);
+  return out;
+}
+
+async function importCovers(file) {
+  let data;
+  try { data = JSON.parse(await file.text()); } catch { return toast("Die Datei ist kein gültiges JSON"); }
+  const list = coverEntries(data);
+  if (!list.length) return toast("Keine Cover in der Datei gefunden");
+  for (const [id, src] of list) await saveCover("ani" + id, src);
+  patchCovers();
+  toast(`${list.length} Cover importiert`);
+  if (route().view === "settings") renderSettings();
+}
+
+function exportCovers() {
+  const out = {};
+  for (const [k, v] of Object.entries(COVERS)) { const m = /^ani(\d+)$/.exec(k); if (m) out[m[1]] = v; }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: "application/json" }));
+  a.download = "sakuga-cover.json"; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast(`${Object.keys(out).length} Cover exportiert`);
+}
+
+
+const onScreen = new Map(); // Cover-Schlüssel -> Anime, damit nachgeladene oder eigene Cover sofort erscheinen
+const coverSrc = a => COVERS[coverKey(a)] || a.cover;
+
+function cover(a) {
+  const ck = coverKey(a);
+  onScreen.set(ck, a);
+  const style = a.color ? ` style="--c1:${esc(a.color)}"` : "";
+  const src = coverSrc(a);
+  return `<div class="cover" data-ck="${esc(ck)}"${style}>${src ? `<img src="${esc(src)}" alt="" loading="lazy" decoding="async">` : `<span class="fallback">${esc(animeTitle(a))}</span>`}</div>`;
+}
+
+try { localStorage.removeItem("sakuga.trim"); } catch {}
+
+/** Tauscht alle sichtbaren Cover gegen den aktuellen Stand (AniList nachgeladen oder eigenes Bild). */
+function patchCovers() {
+  document.querySelectorAll(".cover[data-ck]").forEach(el => {
+    const a = onScreen.get(el.dataset.ck);
+    if (!a) return;
+    const src = coverSrc(a), img = el.querySelector("img");
+    if ((img?.getAttribute("src") || null) === (src || null)) return;
+    el.outerHTML = cover(a);
+  });
+  document.querySelectorAll(".poster[data-ck]").forEach(el => {
+    const a = onScreen.get(el.dataset.ck);
+    if (a) el.style.cssText = posterBg(a);
+  });
+}
+
+/** Cover für die Treffer holen, die gerade zu sehen sind; danach austauschen. */
+const needAni = themes => [...new Set(themes.map(t => t.anime))].filter(a => a.src === "db" && (a.anilistId ? !aniKnown(a.anilistId) : (a.malId ? !ANI_INFO["m" + a.malId] : !ANI_INFO["n" + a.annId])));
+/** Wartet kurz auf AniList (Staffelnamen, Cover), höchstens 2,5 Sekunden. Danach ist alles gespeichert und sofort da. */
+const withAni = async themes => { const a = needAni(themes); if (a.length) await Promise.race([loadAniList(a).catch(() => {}), new Promise(r => setTimeout(r, 2500))]); return themes; };
+
+function ensureCovers(themes) {
+  const animes = needAni(themes);
+  if (animes.length) loadAniList(animes).then(patchCovers);
+}
+
+function rowHTML(t, i) {
+  return `<a class="row rise" style="--i:${i}" href="#song-${t.id}" data-id="${t.id}">
+    ${cover(t.anime)}
+    <div style="min-width:0"><div class="song">${esc(songTitle(t))}</div><div class="sub">${esc(artistLine(t))} · ${esc(animeTitle(t.anime))}</div></div>
+    <div class="right">${t.src === "custom" ? `<span class="tag mine">Eigen</span>` : ""}<span class="season">${esc(seasonLabel(t.anime))}</span><span class="tag ${typeCls(t)}">${esc(t.slug)}</span></div>
+  </a>`;
+}
+
+function cardHTML(t, i) {
+  const glow = t.anime.color ? `;--glow:${esc(t.anime.color)}` : "";
+  return `<a class="card rise" style="--i:${i}${glow}" href="#song-${t.id}" data-id="${t.id}">
+    <div class="art">${cover(t.anime)}<span class="tag ${typeCls(t)}">${esc(t.slug)}</span>${t.src === "custom" ? `<span class="tag mine corner">Eigen</span>` : ""}<div class="hoverplay"><span>${playIcon(22)}</span></div></div>
+    <div><div class="song">${esc(songTitle(t))}</div><div class="sub">${esc(artistLine(t))}</div><div class="sub">${esc(animeTitle(t.anime))} · ${esc(seasonLabel(t.anime))}</div></div>
+  </a>`;
+}
+
+/** Video lädt erst beim Klick; spielt immer nur eins gleichzeitig. */
+const posterBg = a => { const src = coverSrc(a); return src ? `background-image:url('${esc(src)}')` : `background-image:linear-gradient(135deg, ${esc(a.color || "#6b2a4a")}, #1a1430)`; };
+const canLookup = t => t.src === "db" && !t.upgraded && !!(t.anime.anilistId || t.anime.malId);
+const mayUpgrade = t => !t.video && canLookup(t); // nur ohne AnisongDB-Video auf AnimeThemes warten
+const NO_VIDEO = "Für diesen Song gibt es noch kein Video.";
+
+function vtagsHTML(t) {
+  if (!t.video) return "";
+  return `${t.video.nc ? "<span>NC</span>" : ""}${t.video.resolution ? `<span>${t.video.resolution}p</span>` : ""}<span>${t.video.from === "AMQ" ? "AnisongDB" : esc(t.video.from || "AnimeThemes")}</span>`;
+}
+
+function playerHTML(t, small = false) {
+  if (!t.video && !mayUpgrade(t)) return `<div class="player novideo${small ? " small" : ""}">${NO_VIDEO}</div>`;
+  const tags = small ? "" : `<span class="vtags">${mayUpgrade(t) ? "" : vtagsHTML(t)}${t.video?.kind === "youtube" ? "<span>öffnet in neuem Fenster</span>" : ""}</span>`;
+  return `<div class="player${small ? " small" : ""}"><button type="button" class="poster" style="${posterBg(t.anime)}" data-ck="${esc(coverKey(t.anime))}" data-play="${esc(t.id)}" aria-label="${esc(songTitle(t))} abspielen"><span class="playbtn">${playIcon(small ? 22 : 30)}</span>${tags}</button></div>`;
+}
+
+/** Wartet kurz auf das Ersatzvideo von AnimeThemes, aber nie länger als 4 Sekunden. */
+const upgradeSoon = t => Promise.race([upgradeVideo(t), new Promise(r => setTimeout(r, 4000))]);
+
+document.addEventListener("click", async e => {
+  const btn = e.target.closest("[data-play]");
+  if (!btn || btn.dataset.busy) return;
+  const t = byId.get(btn.dataset.play) || tour?.themes[btn.dataset.play];
+  if (!t) return;
+  btn.dataset.busy = "1";
+  btn.classList.add("waiting");
+  if (!t.video || (prefs.videoSource === "animethemes" && t.src === "db")) await upgradeSoon(t);
+  if (!btn.isConnected) return;
+  // Bevorzugte Videoquelle aus den Einstellungen. Das AnisongDB-Video bleibt als Ersatz gemerkt.
+  if (t.src === "db") {
+    if (prefs.videoSource === "animethemes" && t.atVideo && t.video !== t.atVideo) { t.dbVideo = t.video; t.video = t.atVideo; }
+    else if (prefs.videoSource !== "animethemes" && t.dbVideo) { t.video = t.dbVideo; delete t.dbVideo; }
+  }
+  document.querySelectorAll("video").forEach(v => v.pause());
+  if (!t.video) { btn.parentElement.outerHTML = `<div class="player novideo">${NO_VIDEO}</div>`; return; }
+  if (t.video.kind === "youtube") {
+    // YouTube lässt sich aus einer lokalen Datei nicht einbetten (Fehler 153), darum ein eigenes kleines Fenster.
+    delete btn.dataset.busy; btn.classList.remove("waiting");
+    const w = Math.min(1100, screen.availWidth - 80), h = Math.round(w * 9 / 16) + 80;
+    const win = window.open(`https://www.youtube.com/watch?v=${t.video.yt}`, "sakuga-youtube", `popup,width=${w},height=${h},left=${Math.round((screen.availWidth - w) / 2)},top=${Math.round((screen.availHeight - h) / 2)}`);
+    if (win) win.focus(); else toast("Popup blockiert, bitte Popups für diese Datei erlauben");
+    return;
+  }
+  let src = t.video.link;
+  if (t.video.kind === "upload") {
+    src = await uploadedUrl(t.video.key);
+    if (!btn.isConnected) return;
+    if (!src) { btn.parentElement.outerHTML = `<div class="player novideo">Das hochgeladene Video ist in diesem Browser nicht mehr gespeichert.</div>`; return; }
+  }
+  if (t.video.kind === "streamable") {
+    src = await streamableFile(t.video.code);
+    if (!btn.isConnected) return;
+    if (!src) {
+      // Ohne direkte Datei bleibt Streamables eigener Player (dann ohne Sakuga-Lautstärkeregler).
+      const f = document.createElement("iframe");
+      f.src = `https://streamable.com/e/${t.video.code}?autoplay=1`;
+      f.allow = "autoplay; fullscreen"; f.allowFullscreen = true; f.title = songTitle(t);
+      btn.replaceWith(f);
+      return;
+    }
+  }
+  const v = document.createElement("video");
+  v.dataset.song = t.id;
+  v.crossOrigin = "anonymous"; // nötig, damit der Lautstärkeregler auch lauter als das Original kann
+  v.src = src; v.controls = true; v.autoplay = true; v.playsInline = true;
+  v.addEventListener("play", () => { document.querySelectorAll("video").forEach(o => o !== v && o.pause()); boost(v); });
+  applyVolume(v);
+  // Lädt das AnisongDB-Video nicht, springt AnimeThemes ein.
+  let retried = false;
+  v.addEventListener("error", async () => {
+    // Erlaubt der Videoserver keinen Zugriff fürs Lauterstellen, ohne ihn noch einmal versuchen (dann nur leiser möglich).
+    if (v.crossOrigin) { v.removeAttribute("crossorigin"); v.src = v.currentSrc || v.src; applyVolume(v); v.play().catch(() => {}); return; }
+    if (t.src !== "db") {
+      // Eigene Datei oder eigener Link lädt nicht: sagen, welcher Pfad gesucht wurde.
+      v.closest(".player")?.insertAdjacentHTML("afterend", `<div class="hint" style="color:var(--op);padding-top:8px">Video konnte nicht geladen werden: ${esc(decodeURI(t.video.link))}. Stimmt der Dateiname, und liegt die Datei im Ordner videos neben sakuga.html?</div>`);
+      return;
+    }
+    if (retried) return;
+    retried = true;
+    if (t.dbVideo && v.src !== t.dbVideo.link) { t.video = t.dbVideo; v.crossOrigin = "anonymous"; v.src = t.dbVideo.link; v.play().catch(() => {}); return; }
+    await upgradeSoon(t);
+    if (t.atVideo && v.src !== t.atVideo.link) { t.video = t.atVideo; v.src = t.atVideo.link; v.play().catch(() => {}); }
+  });
+  btn.replaceWith(v);
+});
+
+/* ---------- Lautstärke: 50 % ist das Original, pro Song gemerkt ---------- */
+
+const VOLUMES = store.get("sakuga.vol", {}); // Song-ID -> 0…100
+const volOf = id => VOLUMES[id] ?? 50;
+let audioCtx = null;
+
+/** Hängt das Video an einen Verstärker, damit es auch lauter als das Original geht. Nur bei erlaubtem Zugriff. */
+function boost(v) {
+  if (v._gain || !v.crossOrigin) return applyVolume(v);
+  try {
+    audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+    const g = audioCtx.createGain();
+    audioCtx.createMediaElementSource(v).connect(g).connect(audioCtx.destination);
+    v._gain = g;
+    audioCtx.resume();
+  } catch { /* ohne Verstärker geht es nur leiser */ }
+  applyVolume(v);
+}
+
+function applyVolume(v) {
+  const factor = volOf(v.dataset.song) / 50; // 0 … 2
+  if (v._gain) { v._gain.gain.value = factor; v.volume = 1; }
+  else v.volume = Math.min(1, factor);
+  // Ohne Verstärker (Videoserver erlaubt keinen Zugriff) geht es nur bis zum Original.
+  const capped = !v._gain && !v.crossOrigin && factor > 1;
+  document.querySelectorAll(`.vol[data-vol="${CSS.escape(v.dataset.song)}"] .capped`).forEach(el => el.hidden = !capped);
+}
+
+function volumeHTML(t) {
+  if (t.video?.kind === "youtube") return "";
+  const val = volOf(t.id);
+  return `<div class="vol" data-vol="${esc(t.id)}" title="50 % ist die Originallautstärke. Wird für diesen Song gemerkt.">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+    <input type="range" min="0" max="100" step="1" value="${val}" aria-label="Lautstärke für diesen Song" style="--v:${val}%">
+    <span class="num">${val} %</span>
+    <button type="button" class="chip" data-volreset ${val === 50 ? "hidden" : ""}>Normal</button>
+    <small class="capped" hidden>lauter als das Original geht bei diesem Video nicht</small>
+  </div>`;
+}
+
+function setVolume(id, val) {
+  if (val === 50) delete VOLUMES[id]; else VOLUMES[id] = val;
+  store.set("sakuga.vol", VOLUMES);
+  document.querySelectorAll(`.vol[data-vol="${CSS.escape(id)}"]`).forEach(box => {
+    const r = box.querySelector("input");
+    r.value = val; r.style.setProperty("--v", val + "%");
+    box.querySelector(".num").textContent = val + " %";
+    box.querySelector("[data-volreset]").hidden = val === 50;
+  });
+  document.querySelectorAll(`video[data-song="${CSS.escape(id)}"]`).forEach(applyVolume);
+}
+
+document.addEventListener("input", e => {
+  const box = e.target.closest(".vol");
+  if (box && e.target.type === "range") setVolume(box.dataset.vol, +e.target.value);
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-volreset]");
+  if (b) setVolume(b.closest(".vol").dataset.vol, 50);
+});
+
+/* ---------- Zustand ---------- */
+
+const state = {
+  query: { q: "", type: "all", season: "all", year: null },
+  sort: "rel",
+  results: null,      // { themes, scope }
+  loading: false,
+  error: null,
+  ctrl: null,
+  shown: 120,
+};
+const PAGE = 120;
+const byId = new Map(); // alle bisher geladenen Songs, für schnelle Song-Seiten
+
+function remember(themes) { themes.forEach(t => byId.set(t.id, t)); return themes; }
+
+async function runSearch() {
+  state.ctrl?.abort();
+  const ctrl = state.ctrl = new AbortController();
+  state.loading = true; state.error = null; state.shown = PAGE;
+  $("#spin").hidden = false;
+  if (route().view === "search") renderSearch();
+  try {
+    const res = await findThemes(state.query, ctrl.signal);
+    if (ctrl.signal.aborted) return;
+    state.results = { themes: remember(res.themes), scope: res.scope, source: res.source };
+  } catch (e) {
+    if (e.name === "AbortError") return;
+    state.error = e;
+  } finally {
+    if (state.ctrl === ctrl) { state.loading = false; $("#spin").hidden = true; }
+  }
+  if (route().view === "search") renderSearch();
+}
+
+function errorHTML(e) {
+  if (e instanceof Unreachable) {
+    return `<div class="message"><b>Weder AnisongDB noch AnimeThemes sind erreichbar.</b><br>Prüf deine Internetverbindung. Falls die läuft, blockiert dein Browser die Anfrage aus einer lokalen Datei. Dann sag Claude Bescheid, das lässt sich lösen.</div>`;
+  }
+  return `<div class="message"><b>Die Songs konnten nicht geladen werden.</b><br>${esc(e.message)}. Versuch es gleich noch einmal.</div>`;
+}
+
+/* ---------- Suche ---------- */
+
+function sorted(themes) {
+  if (state.sort === "rel") return themes;
+  const idx = t => (t.anime.year || 0) * 4 + (t.anime.season ? SEASONS.indexOf(t.anime.season) : 0);
+  const c = [...themes];
+  if (state.sort === "new") c.sort((a, b) => idx(b) - idx(a));
+  if (state.sort === "old") c.sort((a, b) => idx(a) - idx(b));
+  if (state.sort === "az") c.sort((a, b) => songTitle(a).localeCompare(songTitle(b)));
+  return c;
+}
+
+// Season "now" zeigt die laufende Season als gewählt (ohne Suche und Jahr), sonst „Alle“.
+const shownSeason = q => q.season !== "now" ? q.season : (q.q || q.year ? "all" : currentSeason().season);
+const chip = (group, value, text, cls = "") =>
+  `<button type="button" class="chip ${cls}" data-f="${group}" data-v="${value}" aria-pressed="${String(group === "season" ? shownSeason(state.query) : state.query[group]) === String(value)}">${text}</button>`;
+
+function renderSearch(animate = true) {
+  const q = state.query;
+  const thisYear = new Date().getFullYear();
+  const years = Array.from({ length: thisYear - 1962 }, (_, i) => thisYear - i);
+  const res = state.results;
+  const themes = res ? sorted(res.themes) : [];
+  const withVideo = res ? res.themes.filter(t => t.video).length : 0;
+
+  let body;
+  if (state.error) body = errorHTML(state.error);
+  else if (!res) body = `<div class="skel" aria-busy="true">${"<div></div>".repeat(8)}</div>`;
+  else if (!themes.length && !state.loading) body = `<div class="message">Keine Treffer. Versuch es mit einem anderen Namen oder entferne einen Filter.<br>Fehlt ein Song, weil er noch ganz neu ist? <a href="#neu">Selbst eintragen</a></div>`;
+  else {
+    const visible = themes.slice(0, state.shown);
+    body = prefs.layout === "grid"
+      ? `<div class="grid">${visible.map((t, i) => cardHTML(t, animate ? i : 0)).join("")}</div>`
+      : `<div class="list">${visible.map((t, i) => rowHTML(t, animate ? i : 0)).join("")}</div>`;
+    if (themes.length > visible.length) body += `<div style="display:flex;justify-content:center;padding-bottom:48px"><button type="button" class="btn" id="showMore">Weitere ${Math.min(PAGE, themes.length - visible.length)} von ${(themes.length - visible.length).toLocaleString("de")} anzeigen</button></div>`;
+  }
+
+  $("#app").innerHTML = `<div class="wrap">
+    <div class="filters">
+      <div class="fgroup"><span class="label">Typ</span>${chip("type", "all", "Alle")}${chip("type", "OP", "Opening", "op")}${chip("type", "ED", "Ending", "ed")}${chip("type", "IN", "Insert", "in")}</div>
+      <div class="fgroup"><span class="label">Season</span>${chip("season", "all", "Alle")}${SEASONS.map(s => chip("season", s, SEASON_DE[s])).join("")}</div>
+      <label class="fgroup"><span class="label">Jahr</span><select id="year">${q.q ? `<option value="">Alle</option>` : ""}${years.map(y => `<option value="${y}" ${(q.year || (q.q ? null : thisYear)) === y ? "selected" : ""}>${y}</option>`).join("")}</select></label>
+    </div>
+    <div class="resultbar">
+      <span>${res ? `<span class="num">${res.themes.length}</span> ${res.themes.length === 1 ? "Song" : "Songs"} · ${esc(res.scope)}${res.source === "paused" ? " · AnisongDB pausiert die Suche gerade (AMQ Ranked), Ergebnisse von AnimeThemes" : res.source === "down" ? " · AnisongDB antwortet nicht, Ergebnisse von AnimeThemes" : ""}` : "Lädt…"}</span>
+      <span class="tools">
+        <label for="sort">Sortieren</label>
+        <select id="sort">${[["rel", q.q ? "Relevanz" : "Anime A–Z"], ["new", "Neueste zuerst"], ["old", "Älteste zuerst"], ["az", "Songtitel A–Z"]].map(([v, l]) => `<option value="${v}" ${state.sort === v ? "selected" : ""}>${l}</option>`).join("")}</select>
+        <span class="seg" data-on="${prefs.layout}" role="group" aria-label="Ansicht"><span class="knob"></span>
+          <button type="button" data-layout="list" aria-pressed="${prefs.layout === "list"}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Liste</button>
+          <button type="button" data-layout="grid" aria-pressed="${prefs.layout === "grid"}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Kacheln</button>
+        </span>
+        <button type="button" class="btn ghost" id="toT" ${withVideo >= 8 && !state.loading ? "" : "disabled"} title="Mindestens 8 Songs mit Video nötig">Turnier aus Treffern</button>
+      </span>
+    </div>
+    ${body}
+  </div>`;
+  if (res) ensureCovers(themes.slice(0, state.shown));
+}
+
+/* ---------- Song-Seite ---------- */
+
+async function renderSong(id) {
+  const app = $("#app");
+  if (id.startsWith("c") && REPLACED[id]) return location.replace("#song-" + REPLACED[id].id);
+  let t = id.startsWith("c") ? customSongs().find(x => x.id === id) : byId.get(id);
+  if (!t && id.startsWith("c")) { app.innerHTML = `<div class="wrap"><div class="message"><b>Diesen eigenen Song gibt es nicht mehr.</b><br><a href="#suche">Zur Suche</a></div></div>`; return; }
+  if (t?.src === "custom") byId.set(t.id, t);
+  if (!t) {
+    app.innerHTML = `<div class="wrap"><div class="detail"><div><div class="player" style="background:var(--surface)"></div></div></div></div>`;
+    try { t = id.startsWith("t") ? await themeById(id.slice(1)) : await dbSongById(id); if (t) await withAni([t]); } catch (e) { app.innerHTML = `<div class="wrap">${errorHTML(e)}</div>`; return; }
+    if (route().view !== "song" || route().id !== id) return;
+    if (!t) { app.innerHTML = `<div class="wrap"><div class="message"><b>Diesen Song gibt es nicht.</b><br><a href="#suche">Zur Suche</a></div></div>`; return; }
+    byId.set(t.id, t);
+  }
+  const a = t.anime;
+  rememberRecent(t);
+  app.innerHTML = `<div class="wrap"><div class="detail">
+    <div style="min-width:0">
+      <a class="back" href="#suche">← Zurück zur Suche</a>
+      <div class="rise" style="margin-top:14px" id="playerBox">${playerHTML(t)}</div>
+      <div class="rise" style="--i:1" id="volBox">${volumeHTML(t)}</div>
+      <div class="titleblock rise" style="--i:1">
+        <div class="eyebrow"><span class="tag ${typeCls(t)}">${esc(t.slug)}</span><span>${esc(animeTitle(a))}</span></div>
+        <h1>${esc(songTitle(t))}</h1>
+        <div class="artist">von <b>${esc(artistLine(t))}</b></div>
+      </div>
+      <div class="actions" id="actions"></div>
+      <div class="more" id="more"></div>
+      <div class="franchise" id="franchise"></div>
+    </div>
+    <aside class="credits rise" style="--i:2" id="credits"></aside>
+  </div></div>`;
+  renderCredits(t);
+  ensureCovers([t]);
+
+  // Studio, Folgen und notfalls ein Video von AnimeThemes nachladen, ohne ein laufendes Video zu unterbrechen.
+  if (canLookup(t)) upgradeVideo(t).then(() => {
+    if (route().view !== "song" || route().id !== id) return;
+    const poster = $("#playerBox .poster");
+    if (poster) { $("#playerBox").innerHTML = playerHTML(t); $("#volBox").innerHTML = volumeHTML(t); }
+    renderCredits(t);
+  });
+
+  renderFranchise(t, id);
+  try {
+    const mine = customSongs().filter(x => x.anime.key === a.key || (a.anilistId && x.anime.anilistId === a.anilistId));
+    const official = t.src === "db" ? await dbSongsOfAnime(a.annId) : t.src === "custom" ? (a.malId ? await dbSongsByMal([a.malId]) : []) : a.slug ? await themesByAnime(a.slug) : [];
+    const others = remember([...mine, ...official]).filter(x => x.id !== t.id).sort(animeOrder);
+    if (route().view !== "song" || route().id !== id || !others.length) return;
+    $("#more").innerHTML = `<h2 class="label">Mehr aus ${esc(animeTitle(a))}</h2><div class="list">${others.map((x, i) => rowHTML(x, i + 3)).join("")}</div>`;
+  } catch { /* „Mehr aus …“ ist optional */ }
+}
+
+const FORMAT_DE = { TV: "TV", TV_SHORT: "TV kurz", MOVIE: "Film", SPECIAL: "Special", OVA: "OVA", ONA: "ONA", MUSIC: "Musik" };
+const seasonIdx = a => (a.year || 9999) * 4 + (a.season ? SEASONS.indexOf(a.season) : 0);
+
+/** „Weitere Staffeln und Filme“: verwandte Anime mit ihren Songs zum Aufklappen, in zeitlicher Reihenfolge. */
+async function renderFranchise(t, id) {
+  const a = t.anime;
+  if (!a.anilistId) return;
+  let rel, songs;
+  try {
+    rel = await franchiseOf(a.anilistId);
+    const mals = rel.filter(r => r.mal && r.id !== a.anilistId).map(r => r.mal);
+    songs = mals.length ? await withAni(await dbSongsByMal(mals)) : [];
+    songs = remember(await withAni([...songs, ...await franchiseGaps(rel, songs, a)]));
+  } catch { return; }
+  const box = $("#franchise");
+  if (!box || route().view !== "song" || route().id !== id) return;
+  const fmt = new Map(rel.map(r => [r.id, r.format]));
+  const groups = new Map();
+  for (const x of songs) {
+    if (x.anime.anilistId === a.anilistId) continue;
+    (groups.get(x.anime.key) || groups.set(x.anime.key, []).get(x.anime.key)).push(x);
+  }
+  if (!groups.size) return;
+  const list = [...groups.values()].map(g => ({ anime: g[0].anime, songs: g.sort(animeOrder) }));
+  list.push({ anime: a, current: true });
+  list.sort((x, y) => seasonIdx(x.anime) - seasonIdx(y.anime));
+  const meta = an => [seasonLabel(an), FORMAT_DE[fmt.get(an.anilistId)] || an.format].filter(Boolean).join(" · ");
+  box.innerHTML = `<h2 class="label">Weitere Staffeln und Filme</h2><div class="frlist">${list.map((g, i) => g.current
+    ? `<div class="fr current rise" style="--i:${i}"><div class="frhead">${cover(g.anime)}<div style="min-width:0"><div class="t">${esc(animeTitle(g.anime))}</div><div class="s">${esc(meta(g.anime))}</div></div><span class="here">Du bist hier</span></div></div>`
+    : `<details class="fr rise" style="--i:${i}"><summary class="frhead">${cover(g.anime)}<div style="min-width:0"><div class="t">${esc(animeTitle(g.anime))}</div><div class="s">${esc(meta(g.anime))} · ${g.songs.length} ${g.songs.length === 1 ? "Song" : "Songs"}</div></div><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="list">${g.songs.map((x, k) => rowHTML(x, k)).join("")}</div></details>`).join("")}</div>`;
+  ensureCovers(songs);
+}
+
+const CATEGORY_DE = { character: "Charaktersong", chanting: "Chanting", instrumental: "Instrumental", other: "Sonstiges" };
+const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
+
+/** Credits-Kasten mit Cover (änderbar), Songdaten und Videoquelle. */
+function renderCredits(t) {
+  const box = $("#credits"); if (!box) return;
+  const a = t.anime, mine = !!COVERS[coverKey(a)];
+  const typeLong = t.type === "OP" ? "Opening" : t.type === "ED" ? "Ending" : "Insert Song";
+  const row = (dt, dd) => dd ? `<dt>${dt}</dt><dd>${dd}</dd>` : "";
+  const v = t.video;
+  const videoInfo = !v ? "" : `${v.from === "AMQ" ? "AnisongDB" : v.from === "AnimeThemes" ? "AnimeThemes (Ersatz)" : esc(v.from)}${v.resolution ? ` · ${v.resolution}p` : ""}${v.source ? ` · ${esc(v.source)}` : ""}${v.nc ? " · ohne Credits" : ""}`;
+  box.innerHTML = `
+    <div class="mycover" id="coverDrop" title="Bild hierher ziehen oder auswählen">
+      ${cover(a)}
+      <div class="tools">
+        <span class="label">Cover</span>
+        <label class="chip filechip">${mine ? "Anderes Bild" : "Eigenes Bild"}<input type="file" accept="image/*" id="coverFile" hidden></label>
+        ${mine ? `<button type="button" class="chip" id="coverReset">Original</button>` : ""}
+        <small>${mine ? "Dein Bild, gilt überall" : "oder Bild hierher ziehen"}</small>
+      </div>
+    </div>
+    <h2 class="label">Credits</h2>
+    <dl>
+      ${row("Song", esc(t.song.title))}
+      ${row("Artist", esc(artistLine(t)))}
+      ${row("Typ", `${typeLong} ${t.sequence ?? ""}`)}
+      ${row("Kategorie", esc(CATEGORY_DE[(t.category || "").toLowerCase()]))}
+      ${row("Länge", t.length ? mmss(t.length) : "")}
+      ${row("Anime", `${esc(animeTitle(a))}${a.nameEn && a.nameEn !== a.name ? `<small>${esc(animeTitle(a) === a.name ? a.nameEn : a.name)}</small>` : ""}`)}
+      ${row("Format", esc(a.format))}
+      ${row("Studio", esc(a.studios.join(", ")))}
+      ${row("Season", esc(seasonLabel(a)))}
+      ${row("Folgen", esc(t.episodes))}
+      ${row("Video", mayUpgrade(t) ? `<span style="color:var(--muted);font-weight:400">sucht ein Video …</span>` : videoInfo)}
+      ${t.src === "custom" ? row("Quelle", `Eigener Eintrag<small>Wird automatisch ersetzt, sobald AnisongDB den Song hat.</small>`) : ""}
+    </dl>`;
+  const actions = $("#actions");
+  if (actions) {
+    actions.innerHTML = `<button type="button" class="btn primary" id="copyCredit">Credits kopieren</button>
+      ${a.slug ? `<a class="btn ghost" href="https://animethemes.moe/anime/${esc(a.slug)}" target="_blank" rel="noopener">Auf AnimeThemes öffnen</a>` : ""}
+      ${a.anilistId ? `<a class="btn ghost" href="https://anilist.co/anime/${esc(a.anilistId)}" target="_blank" rel="noopener">Auf AniList öffnen</a>` : ""}
+      ${t.video?.kind === "youtube" || t.video?.kind === "streamable" ? `<a class="btn ghost" href="${esc(t.video.link)}" target="_blank" rel="noopener">Auf ${esc(t.video.from)} öffnen</a>` : ""}
+      ${t.src === "custom" ? `<a class="btn ghost" href="#bearbeiten-${esc(t.id)}">Bearbeiten</a><button type="button" class="btn ghost" id="delCustom">Löschen</button>` : ""}`;
+    $("#copyCredit").onclick = () => copy(`${animeTitle(a)} ${t.slug} – „${songTitle(t)}“ von ${artistLine(t)}${a.studios.length ? ` · ${a.studios.join(", ")}` : ""}${a.year ? `, ${seasonLabel(a)}` : ""}`);
+  }
+  const del = $("#delCustom");
+  if (del) del.onclick = () => {
+    if (!del.dataset.sure) { del.dataset.sure = "1"; del.textContent = "Wirklich löschen?"; return; }
+    CUSTOM = CUSTOM.filter(c => c.id !== t.id); saveCustom(); byId.delete(t.id);
+    if (t.video?.kind === "upload") idb.run("videos", "readwrite", st => st.delete(t.video.key)).catch(() => {});
+    toast("Eigener Song gelöscht"); location.hash = "suche";
+  };
+  const drop = $("#coverDrop");
+  drop.ondragover = e => { e.preventDefault(); drop.classList.add("drag"); };
+  drop.ondragleave = () => drop.classList.remove("drag");
+  drop.ondrop = e => { e.preventDefault(); drop.classList.remove("drag"); const f = e.dataTransfer.files[0]; if (f) setCover(t, f); };
+  $("#coverFile").onchange = e => { const f = e.target.files[0]; if (f) setCover(t, f); };
+  const reset = $("#coverReset");
+  if (reset) reset.onclick = async () => { await saveCover(coverKey(a), null); toast("Original-Cover wiederhergestellt"); patchCovers(); renderCredits(t); };
+}
+
+async function setCover(t, file) {
+  if (!file.type.startsWith("image/")) return toast("Das ist kein Bild");
+  let url;
+  try { url = await fileToCover(file); } catch { return toast("Bild konnte nicht gelesen werden"); }
+  const ok = await saveCover(coverKey(t.anime), url);
+  toast(ok ? "Cover gespeichert" : "Cover gilt nur bis zum Schließen, der Speicher ist voll");
+  patchCovers(); renderCredits(t);
+}
+
+/* ---------- Eigenen Song eintragen oder bearbeiten ---------- */
+
+/** Macht aus „D:\…\x.mp4“, „videos\x.mp4“ oder nur „x.mp4“ einen Pfad, den der Browser abspielen kann. */
+function normVideoPath(v) {
+  if (!v || /^(https?|file):/i.test(v)) return v;
+  if (/^[a-z]:[\\/]/i.test(v)) return "file:///" + encodeURI(v.replace(/\\/g, "/"));
+  v = v.replace(/\\/g, "/").replace(/^\.\//, "");
+  if (/^[a-z][a-z0-9+.-]*:/i.test(v)) return v;
+  return encodeURI(v.includes("/") ? v : "videos/" + v); // nur ein Dateiname: liegt im videos-Ordner
+}
+
+function renderForm(editId) {
+  const app = $("#app");
+  const old = editId ? CUSTOM.find(c => c.id === editId) : null;
+  if (editId && !old) { app.innerHTML = `<div class="wrap"><div class="message"><b>Diesen eigenen Song gibt es nicht mehr.</b><br><a href="#suche">Zur Suche</a></div></div>`; return; }
+  const cur = currentSeason();
+  const f = { anime: old ? { ...old.anime } : null, type: old?.type || "OP" };
+  const thisYear = new Date().getFullYear();
+  const years = Array.from({ length: thisYear + 2 - 1962 }, (_, i) => thisYear + 1 - i);
+  const yearNow = old?.anime.year || cur.year, seasonNow = old?.anime.season || cur.season;
+  app.innerHTML = `<div class="wrap"><form class="cform" id="cform" autocomplete="off" novalidate>
+    <div class="rise"><h1 class="big">${old ? "Eigenen Song bearbeiten" : "Song selbst eintragen"}</h1>
+      <p>Für Songs, die AnisongDB noch nicht kennt, etwa aus der laufenden Season. Sobald AnisongDB den Song hat, ersetzt Sakuga deinen Eintrag automatisch durch den offiziellen.</p></div>
+    <div class="field rise animefield" style="--i:1"><label class="label" for="cAnime">Anime</label>
+      <div id="cPicked"></div>
+      <div class="acwrap" id="cSearch"><input id="cAnime" placeholder="Anime auf AniList suchen, z. B. Tokyo Revengers"><div class="ac" id="cAc" hidden></div></div>
+      <span class="hint" id="cAnimeHint">Wähle den Anime aus der Liste, dann kommen Cover und Season direkt von AniList.</span>
+    </div>
+    <div class="field rise" style="--i:2"><span class="label">Typ</span>
+      <div class="fgroup" id="cType">${[["OP", "Opening", "op"], ["ED", "Ending", "ed"], ["IN", "Insert", "in"]].map(([v, l, c]) => `<button type="button" class="chip ${c}" data-ctype="${v}" aria-pressed="${f.type === v}">${l}</button>`).join("")}</div>
+    </div>
+    <div class="grid2 rise" style="--i:3">
+      <label class="field"><span class="label">Songtitel</span><input id="cTitle" value="${esc(old?.title || "")}" placeholder="z. B. Trickster"></label>
+      <label class="field"><span class="label">Artist</span><input id="cArtist" value="${esc(old?.artist || "")}" placeholder="z. B. Band oder Sängerin"></label>
+      <label class="field"><span class="label">Nummer</span><input id="cSeq" type="number" min="1" max="99" value="${esc(old?.sequence || "")}" placeholder="z. B. 2 für ED2"></label>
+    </div>
+    <div class="grid2 rise" style="--i:4">
+      <label class="field"><span class="label">Season</span><select id="cSeason">${SEASONS.map(x => `<option value="${x}" ${x === seasonNow ? "selected" : ""}>${SEASON_DE[x]}</option>`).join("")}</select></label>
+      <label class="field"><span class="label">Jahr</span><select id="cYear">${years.map(y => `<option value="${y}" ${y === yearNow ? "selected" : ""}>${y}</option>`).join("")}</select></label>
+    </div>
+    <div class="field rise" style="--i:5"><span class="label">Video</span>
+      <div class="upl" id="cUpl">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        <div style="min-width:0"><div class="t" id="cUplInfo"></div><div class="s" id="cUplSub"></div></div>
+        <label class="chip filechip" id="cUplPick">Video wählen<input type="file" accept="video/*,.mkv" id="cFile" hidden></label>
+        <button type="button" class="chip" id="cUplDel" hidden>Entfernen</button>
+      </div>
+      <input id="cVideo" type="text" value="${esc(old?.video?.startsWith("upload:") ? "" : old?.video || "")}" placeholder="… oder einen Link einfügen: Streamable, YouTube oder direkt zu einer .mp4-Datei">
+      <span class="hint">Optional. Hochgeladene Videos speichert Sakuga in diesem Browser, sie spielen direkt hier mit Lautstärkeregler. YouTube öffnet sich in einem eigenen Fenster.</span></div>
+    <div class="actions rise" style="--i:6"><button type="submit" class="btn primary">${old ? "Änderungen speichern" : "Song speichern"}</button><a class="btn ghost" href="${old ? "#song-" + esc(old.id) : "#"}">Abbrechen</a></div>
+  </form></div>`;
+
+  // Video zum Hochladen: neue Datei, das bisherige hochgeladene Video, oder keins
+  f.file = null;
+  f.keepUpload = !!old?.video?.startsWith("upload:");
+  const mb = n => (n / 1048576).toLocaleString("de", { maximumFractionDigits: 1 }) + " MB";
+  const showUpload = () => {
+    const has = f.file || f.keepUpload;
+    $("#cUpl").classList.toggle("has", !!has);
+    $("#cUplInfo").textContent = f.file ? f.file.name : f.keepUpload ? (old.upload?.name || "Hochgeladenes Video") : "Video vom PC hochladen";
+    $("#cUplSub").textContent = f.file ? `${mb(f.file.size)} · wird beim Speichern übernommen` : f.keepUpload ? `${old.upload?.size ? mb(old.upload.size) + " · " : ""}in diesem Browser gespeichert` : "Datei wählen oder hierher ziehen, z. B. eine .mp4";
+    $("#cUplDel").hidden = !has;
+    $("#cUplPick").firstChild.textContent = has ? "Anderes Video" : "Video wählen";
+  };
+  showUpload();
+  const takeFile = file => {
+    if (!file) return;
+    if (!file.type.startsWith("video/") && !/\.(mp4|webm|mkv|mov|m4v)$/i.test(file.name)) return toast("Das ist keine Videodatei");
+    f.file = file; $("#cVideo").value = ""; showUpload();
+  };
+  $("#cFile").onchange = e => takeFile(e.target.files[0]);
+  $("#cUplDel").onclick = () => { f.file = null; f.keepUpload = false; $("#cFile").value = ""; showUpload(); };
+  const upl = $("#cUpl");
+  upl.ondragover = e => { e.preventDefault(); upl.classList.add("drag"); };
+  upl.ondragleave = () => upl.classList.remove("drag");
+  upl.ondrop = e => { e.preventDefault(); upl.classList.remove("drag"); takeFile(e.dataTransfer.files[0]); };
+  $("#cVideo").oninput = () => { if ($("#cVideo").value.trim() && (f.file || f.keepUpload)) { f.file = null; f.keepUpload = false; showUpload(); } };
+
+  const input = $("#cAnime"), ac = $("#cAc");
+  const showPicked = () => {
+    const a = f.anime;
+    $("#cPicked").innerHTML = !a ? "" : `<div class="picked">${cover({ ...a, key: "pick", alt: [], studios: [] })}<div style="min-width:0"><div class="t">${esc(a.nameEn || a.name)}</div><div class="s">${esc([a.nameEn && a.nameEn !== a.name ? a.name : "", seasonLabel(a), FORMAT_DE[a.format] || a.format, a.anilistId ? "von AniList" : "ohne AniList"].filter(Boolean).join(" · "))}</div></div><button type="button" class="chip" id="cUnpick">Ändern</button></div>`;
+    $("#cSearch").hidden = !!a;
+    $("#cAnimeHint").hidden = !!a;
+    if (a) $("#cUnpick").onclick = () => { f.anime = null; showPicked(); input.value = ""; input.focus(); };
+  };
+  showPicked();
+  let hits = [], timer, ctrl;
+  const pickHit = h => {
+    f.anime = h;
+    if (h.season) $("#cSeason").value = h.season;
+    if (h.year) $("#cYear").value = h.year;
+    ac.hidden = true; showPicked(); $("#cTitle").focus();
+  };
+  input.oninput = () => {
+    clearTimeout(timer); ctrl?.abort();
+    const q = input.value.trim();
+    if (q.length < 2) { ac.hidden = true; return; }
+    timer = setTimeout(async () => {
+      ctrl = new AbortController();
+      try { hits = await searchAniList(q, ctrl.signal); } catch (e) { if (e.name === "AbortError") return; hits = []; }
+      ac.innerHTML = hits.map((h, i) => `<button type="button" data-hit="${i}">${cover({ ...h, key: "hit" + i, alt: [], studios: [] })}<span style="min-width:0"><span class="t">${esc(h.nameEn || h.name)}</span><span class="s">${esc([h.nameEn && h.nameEn !== h.name ? h.name : "", seasonLabel(h), FORMAT_DE[h.format] || h.format].filter(Boolean).join(" · "))}</span></span></button>`).join("")
+        + `<button type="button" data-hit="free" class="free"><span></span><span><span class="t">„${esc(q)}“ ohne AniList übernehmen</span><span class="s">Ohne Cover, das kannst du später selbst hochladen</span></span></button>`;
+      ac.hidden = false;
+    }, 300);
+  };
+  ac.onclick = e => {
+    const b = e.target.closest("[data-hit]"); if (!b) return;
+    if (b.dataset.hit === "free") pickHit({ name: input.value.trim(), nameEn: null, anilistId: null, malId: null, year: null, season: null, format: null, cover: null, color: null });
+    else pickHit(hits[+b.dataset.hit]);
+  };
+  input.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); if (hits[0] && !ac.hidden) pickHit(hits[0]); } if (e.key === "Escape") ac.hidden = true; };
+  $("#cType").onclick = e => {
+    const b = e.target.closest("[data-ctype]"); if (!b) return;
+    f.type = b.dataset.ctype;
+    document.querySelectorAll("[data-ctype]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  };
+  $("#cform").onsubmit = async e => {
+    e.preventDefault();
+    const title = $("#cTitle").value.trim();
+    let video = $("#cVideo").value.trim().replace(/^"(.*)"$/, "$1");
+    if (!f.anime && input.value.trim()) f.anime = { name: input.value.trim(), nameEn: null, anilistId: null, malId: null, format: null, cover: null, color: null };
+    if (!f.anime) { toast("Bitte zuerst den Anime wählen"); return input.focus(); }
+    if (!title) { toast("Bitte einen Songtitel eintragen"); return $("#cTitle").focus(); }
+    // Erlaubt: Web-Links, Windows-Pfade, file:///-Pfade und Pfade relativ zur Sakuga-Datei (z. B. videos/trickster.mp4).
+    video = normVideoPath(video);
+    if (video && /^[a-z][a-z0-9+.-]*:/i.test(video) && !/^(https?|file):/i.test(video)) { toast("Der Video-Link muss mit https:// beginnen oder ein Pfad zu einer Videodatei sein"); return $("#cVideo").focus(); }
+    const id = old?.id || "c" + Date.now();
+    let upload = f.keepUpload ? old.upload || {} : null;
+    if (f.file) {
+      const btn = $("#cform button[type=submit]");
+      btn.disabled = true; btn.textContent = "Video wird gespeichert …";
+      try {
+        navigator.storage?.persist?.().catch(() => {}); // Browser bitten, die Videos nicht von selbst aufzuräumen
+        await idb.run("videos", "readwrite", st => st.put(f.file, id));
+        uploadUrls.delete(id);
+        upload = { name: f.file.name, size: f.file.size };
+      } catch {
+        btn.disabled = false; btn.textContent = old ? "Änderungen speichern" : "Song speichern";
+        return toast("Video konnte nicht gespeichert werden, vermutlich ist der Speicher voll");
+      }
+    } else if (!upload && old?.video?.startsWith("upload:")) {
+      idb.run("videos", "readwrite", st => st.delete(id)).catch(() => {}); // Video entfernt
+    }
+    const rec = {
+      id, type: f.type, sequence: +$("#cSeq").value || null, title,
+      artist: $("#cArtist").value.trim(), video: upload ? "upload:" + id : video || null, upload: upload || undefined,
+      anime: { ...f.anime, season: $("#cSeason").value, year: +$("#cYear").value }, checkedAt: 0,
+    };
+    CUSTOM = old ? CUSTOM.map(c => c.id === old.id ? rec : c) : [...CUSTOM, rec];
+    if (!saveCustom()) toast("Speichern fehlgeschlagen, der Browser-Speicher ist voll");
+    else toast(old ? "Änderungen gespeichert" : "Song gespeichert");
+    location.hash = "song-" + rec.id;
+    checkCustom(true); // vielleicht kennt AnisongDB ihn ja schon
+  };
+  if (!old) input.focus();
+}
+
+/* ---------- Turnier ---------- */
+
+const ROUND_NAMES = { 2: "Finale", 4: "Halbfinale", 8: "Viertelfinale", 16: "Achtelfinale", 32: "Sechzehntelfinale" };
+const roundName = n => ROUND_NAMES[n] || `Runde der ${n}`;
+// Turnier mit beliebig vielen Songs: Das Feld wird auf die nächste Zweierpotenz aufgefüllt, die Lücken sind Freilose (null).
+let tour = store.get("sakuga.tournament", null);
+if (tour && !tour.rounds?.[0]?.every(id => id === null || tour.themes[id])) tour = null;
+const entrantsOf = () => tour.count || tour.size;
+const isBye = (r, m) => r === 0 && (tour.rounds[0][m * 2] === null || tour.rounds[0][m * 2 + 1] === null);
+/** Wie viele echte Duelle (ohne Freilose) schon entschieden sind. */
+function playedDuels() {
+  const decided = tour.rounds.slice(1).reduce((s, r) => s + r.length, 0);
+  let byes = 0;
+  for (let m = 0; m < (tour.rounds[1]?.length || 0); m++) if (isBye(0, m)) byes++;
+  return decided - byes;
+}
+/** Zum nächsten Duell; Freilose werden dabei automatisch durchgewunken. */
+function advance(winner) {
+  const ids = tour.rounds[tour.r];
+  (tour.rounds[tour.r + 1] ||= []).push(winner);
+  tour.m++;
+  if (tour.m * 2 >= ids.length) { tour.r++; tour.m = 0; tour.done = tour.rounds[tour.r].length === 1; }
+}
+function skipByes() {
+  while (!tour.done && isBye(tour.r, tour.m)) {
+    const ids = tour.rounds[tour.r];
+    advance(ids[tour.m * 2] ?? ids[tour.m * 2 + 1]);
+  }
+}
+const saveTour = () => { try { tour ? localStorage.setItem("sakuga.tournament", JSON.stringify(tour)) : localStorage.removeItem("sakuga.tournament"); } catch {} };
+const setup = { source: "season", type: "all", size: 16, pool: null, poolKey: null, error: null, season: null, year: null, pq: "", presults: null };
+// Eigene Auswahl fürs Turnier: frei zusammengesuchte Songs, auch über Seasons hinweg. Bleibt gespeichert.
+let PICKED = store.get("sakuga.pick", []);
+const savePicked = () => store.set("sakuga.pick", PICKED);
+const SIZE_PRESETS = [8, 16, 32, 64];
+let picking = false;
+
+function shuffle(a) { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+async function loadPool() {
+  if (setup.source === "pick") return;
+  const cur = currentSeason();
+  const query = setup.source === "search" ? { ...state.query, type: setup.type }
+    : { q: "", type: setup.type, season: setup.season || cur.season, year: setup.year || cur.year };
+  const key = JSON.stringify(query);
+  if (setup.poolKey === key && !setup.error) return; // schon geladen oder unterwegs
+  setup.poolKey = key; setup.pool = null; setup.error = null;
+  renderTournament();
+  try {
+    const res = await findThemes(query);
+    if (setup.poolKey !== key) return;
+    setup.pool = { themes: remember(res.themes).filter(t => t.video), scope: res.scope };
+  } catch (e) {
+    if (setup.poolKey !== key) return;
+    setup.error = e;
+  }
+  if (route().view === "tournament") renderTournament();
+}
+
+function renderTournament() {
+  const app = $("#app");
+  if (!tour) {
+    const hasSearch = !!(state.query.q || state.query.year || state.query.season !== "all");
+    if (!hasSearch && setup.source === "search") setup.source = "season";
+    const cur = currentSeason();
+    const thisYear = new Date().getFullYear();
+    const years = Array.from({ length: thisYear + 1 - 1962 }, (_, i) => thisYear - i);
+    const pickMode = setup.source === "pick";
+    const avail = pickMode ? PICKED.length : setup.pool?.themes.length ?? 0;
+    const loading = !pickMode && !setup.pool && !setup.error;
+    const size = pickMode ? PICKED.length : loading || avail >= setup.size ? setup.size : Math.max(2, avail);
+    const typeChips = `<div class="fgroup">${[["all", "Openings und Endings", ""], ["OP", "Nur Openings", "op"], ["ED", "Nur Endings", "ed"]].map(([v, l, c]) => `<button type="button" class="chip ${c}" data-ttype="${v}" aria-pressed="${setup.type === v}">${l}</button>`).join("")}</div>`;
+    const sourceBox = pickMode ? `
+        <div class="picker">
+          <label class="searchbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input id="tq" type="search" autocomplete="off" placeholder="Anime, Song oder Artist suchen und hinzufügen…" value="${esc(setup.pq)}" aria-label="Songs fürs Turnier suchen"></label>
+          ${typeChips}
+          <div id="tres"></div>
+          <div class="pickhead"><span class="label">Deine Auswahl · <span id="pcount">${PICKED.length}</span> Songs</span><button type="button" class="btn ghost" id="pclear" ${PICKED.length ? "" : "disabled"}>Auswahl leeren</button></div>
+          <div class="plist" id="tpicked"></div>
+        </div>`
+      : `${setup.source === "season" ? `<div class="tseason">
+          <select id="tSeason" aria-label="Season"><option value="all" ${setup.season === "all" ? "selected" : ""}>Ganzes Jahr</option>${SEASONS.map(x => `<option value="${x}" ${(setup.season || cur.season) === x ? "selected" : ""}>${SEASON_DE[x]}</option>`).join("")}</select>
+          <select id="tYear" aria-label="Jahr">${years.map(y => `<option value="${y}" ${(setup.year || cur.year) === y ? "selected" : ""}>${y}</option>`).join("")}</select>
+        </div>` : ""}
+        ${typeChips}
+        <div class="hint">${loading ? "Songs werden geladen…" : setup.error ? esc(setup.error instanceof Unreachable ? "AnisongDB und AnimeThemes sind nicht erreichbar." : setup.error.message) : `${avail} Songs mit Video · ${esc(setup.pool.scope)}`}</div>`;
+    app.innerHTML = `<div class="wrap"><div class="tsetup">
+      <div class="rise"><h1 class="big">OP/ED-Turnier</h1><p>Songs treten paarweise gegeneinander an. Du hörst rein und wählst, wer weiterkommt, bis ein Sieger übrig ist.</p></div>
+      <div class="opt"><span class="label">Songs aus</span>
+        <div class="fgroup">
+          <button type="button" class="chip" data-src="season" aria-pressed="${setup.source === "season"}">Einer Season</button>
+          <button type="button" class="chip" data-src="pick" aria-pressed="${pickMode}">Eigener Auswahl</button>
+          ${hasSearch ? `<button type="button" class="chip" data-src="search" aria-pressed="${setup.source === "search"}">Deiner Suche${state.query.q ? ` „${esc(state.query.q)}“` : ""}</button>` : ""}
+        </div>
+        ${sourceBox}
+      </div>
+      ${pickMode ? `<div class="hint" id="sizeHint">${PICKED.length >= 2 ? sizeHint(PICKED.length) : "Füge mindestens 2 Songs hinzu."}</div>` : `<div class="opt"><span class="label">Anzahl Songs</span>
+        <div class="sizes">${SIZE_PRESETS.map((n, i) => `<button type="button" class="size rise" style="--i:${i}" data-size="${n}" aria-pressed="${size === n}" ${!loading && avail < n ? "disabled" : ""}><b>${n}</b><small>${n - 1} Duelle</small></button>`).join("")}
+          <label class="size custom rise" style="--i:4" aria-pressed="${!SIZE_PRESETS.includes(size)}"><input type="number" id="sizeIn" min="2" max="${loading ? 999 : avail}" value="${size}" aria-label="Eigene Anzahl Songs"><small>Eigene Anzahl${loading ? "" : `, bis ${avail}`}</small></label>
+        </div>
+        <div class="hint" id="sizeHint">${sizeHint(size)}</div>
+      </div>`}
+      <div><button type="button" class="btn primary" id="startT" data-size-final="${size}" ${loading || avail < 2 || size > avail ? "disabled" : ""}>Turnier mit ${size} Songs starten</button></div>
+    </div></div>`;
+    if (pickMode) { renderPicked(); renderPickResults(); }
+    loadPool();
+    return;
+  }
+  if (tour.done) return renderChampion();
+
+  const ids = tour.rounds[tour.r];
+  const pair = [ids[tour.m * 2], ids[tour.m * 2 + 1]].map(id => tour.themes[id]);
+  pair.filter(t => !t.video).forEach(t => upgradeVideo(t).catch(() => {})); // Ersatzvideo schon mal suchen
+  ensureCovers(pair);
+  const n = ids.length;
+  const played = playedDuels(), total = entrantsOf() - 1;
+  const fighter = (t, i) => `<div class="fighter rise" style="--i:${i}">
+    ${playerHTML(t, true)}${volumeHTML(t)}
+    <div><div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span class="tag ${typeCls(t)}">${esc(t.slug)}</span><span class="sub">${esc(animeTitle(t.anime))}</span></div>
+      <div class="song">${esc(songTitle(t))}</div><div class="sub">${esc(artistLine(t))}</div></div>
+    <button type="button" class="btn primary pick" data-pick="${i}">Weiter mit diesem Song</button>
+  </div>`;
+  app.innerHTML = `<div class="wrap"><div class="duel">
+    <div class="duelhead">
+      <div><div class="label">${roundName(n)} · Duell ${tour.m + 1} von ${n / 2}</div><h1 class="big">Wer kommt weiter?</h1></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="num" style="font-size:13px;color:var(--muted)">${played}/${total} Duelle</span>
+        <button type="button" class="btn ghost" id="undo" ${played ? "" : "disabled"}>Zurück</button><button type="button" class="btn ghost" id="newT">Abbrechen</button></div>
+    </div>
+    <div class="pbar"><i style="width:${(played / total) * 100}%"></i></div>
+    <div class="vs">${fighter(pair[0], 0)}<div class="vsmark">VS</div>${fighter(pair[1], 1)}</div>
+    <div class="keys">Tasten: <kbd>←</kbd> links gewinnt · <kbd>→</kbd> rechts gewinnt · <kbd>Z</kbd> zurück</div>
+    ${bracketHTML()}
+  </div></div>`;
+}
+
+/* ---------- Eigene Auswahl: Songs per Suche zusammenstellen ---------- */
+
+const isPicked = id => PICKED.some(t => t.id === id);
+
+function pickRow(t, on) {
+  return `<div class="prow ${on ? "on" : ""}" data-pid="${esc(t.id)}">${cover(t.anime)}
+    <div style="min-width:0"><div class="song">${esc(songTitle(t))} <span class="tag ${typeCls(t)}">${esc(t.slug)}</span></div>
+      <div class="sub">${esc(artistLine(t))} · ${esc(animeTitle(t.anime))}${t.anime.year ? ` · ${esc(seasonLabel(t.anime))}` : ""}${t.video ? "" : " · noch kein Video"}</div></div>
+    <button type="button" class="tog" data-ptoggle="${esc(t.id)}" aria-label="${on ? "Entfernen" : "Hinzufügen"}">${on ? "✓" : "+"}</button></div>`;
+}
+
+function renderPicked() {
+  const box = $("#tpicked"); if (!box) return;
+  box.innerHTML = PICKED.length ? [...PICKED].reverse().map(t => pickRow(t, true)).join("") : `<div class="hint">Noch nichts ausgewählt. Such oben nach Songs und füge sie mit + hinzu.</div>`;
+  $("#pcount").textContent = PICKED.length;
+  $("#pclear").disabled = !PICKED.length;
+  const n = PICKED.length, start = $("#startT");
+  start.disabled = n < 2; start.dataset.sizeFinal = n; start.textContent = `Turnier mit ${n} Songs starten`;
+  $("#sizeHint").textContent = n >= 2 ? sizeHint(n) : "Füge mindestens 2 Songs hinzu.";
+  ensureCovers(PICKED);
+}
+
+function renderPickResults() {
+  const box = $("#tres"); if (!box) return;
+  const r = setup.presults;
+  if (!setup.pq) { box.innerHTML = ""; return; }
+  if (!r) { box.innerHTML = `<div class="hint">Suche…</div>`; return; }
+  if (r.error) { box.innerHTML = `<div class="hint">${esc(r.error)}</div>`; return; }
+  const list = r.themes.slice(0, 40);
+  const open = list.filter(t => !isPicked(t.id)).length;
+  box.innerHTML = `<div class="pickhead" style="margin-bottom:8px"><span class="hint">${r.themes.length} Treffer${r.themes.length > 40 ? ", die ersten 40" : ""}</span>${open ? `<button type="button" class="btn ghost" id="paddall">Alle ${open} hinzufügen</button>` : ""}</div>
+    <div class="plist">${list.map(t => pickRow(t, isPicked(t.id))).join("")}</div>`;
+  ensureCovers(list);
+}
+
+let pickTimer, pickCtl;
+function runPickSearch() {
+  clearTimeout(pickTimer);
+  pickCtl?.abort();
+  setup.presults = null;
+  renderPickResults();
+  if (!setup.pq) return;
+  pickTimer = setTimeout(async () => {
+    const ctl = pickCtl = new AbortController();
+    try {
+      const res = await findThemes({ q: setup.pq, type: setup.type, season: "all", year: null }, ctl.signal);
+      if (ctl.signal.aborted) return;
+      setup.presults = { themes: remember(res.themes) };
+    } catch (e) {
+      if (e.name === "AbortError") return;
+      setup.presults = { themes: [], error: e instanceof Unreachable ? "AnisongDB und AnimeThemes sind nicht erreichbar." : e.message };
+    }
+    renderPickResults();
+  }, 350);
+}
+
+function togglePick(id) {
+  if (isPicked(id)) PICKED = PICKED.filter(t => t.id !== id);
+  else { const t = byId.get(id) || setup.presults?.themes.find(x => x.id === id); if (t) PICKED.push(t); }
+  savePicked();
+  document.querySelectorAll(`#tres .prow[data-pid="${CSS.escape(id)}"]`).forEach(el => el.outerHTML = pickRow(byId.get(id) || PICKED.find(t => t.id === id), isPicked(id)));
+  renderPicked();
+  const all = $("#paddall"); if (all) renderPickResults();
+}
+
+function sizeHint(n) {
+  const slots = 2 ** Math.ceil(Math.log2(Math.max(2, n)));
+  return `${n - 1} Duelle${slots > n ? ` · ${slots - n} ${slots - n === 1 ? "Song bekommt" : "Songs bekommen"} in der ersten Runde ein Freilos` : ""}`;
+}
+
+function startTournament(count) {
+  if (setup.source === "pick") setup.pool = { themes: PICKED.map(t => byId.get(t.id) || t), scope: "Eigene Auswahl" };
+  const entrants = shuffle(setup.pool.themes).slice(0, count);
+  count = entrants.length;
+  const size = 2 ** Math.ceil(Math.log2(Math.max(2, count)));
+  const byes = size - count, pairs = size / 2;
+  // Freilose gleichmäßig über das Feld verteilen, nie zwei in einem Duell.
+  const byePairs = new Set(Array.from({ length: byes }, (_, i) => Math.floor(i * pairs / byes)));
+  const slots = [];
+  let k = 0;
+  for (let m = 0; m < pairs; m++) slots.push(entrants[k++].id, byePairs.has(m) ? null : entrants[k++].id);
+  tour = { size, count, scope: setup.pool.scope, themes: Object.fromEntries(entrants.map(t => [t.id, t])), rounds: [slots], r: 0, m: 0, done: false };
+  skipByes();
+  saveTour(); renderTournament();
+}
+
+function pick(i) {
+  if (!tour || tour.done || picking) return;
+  picking = true;
+  document.querySelectorAll("video").forEach(v => v.pause());
+  document.querySelectorAll(".fighter").forEach((f, k) => f.classList.add(k === i ? "win" : "lose"));
+  setTimeout(() => {
+    picking = false;
+    advance(tour.rounds[tour.r][tour.m * 2 + i]);
+    skipByes();
+    saveTour(); renderTournament();
+    if (tour.done) burst();
+  }, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 320);
+}
+
+function undo() {
+  if (!tour || !playedDuels()) return;
+  // Ein echtes Duell zurücknehmen; dabei durchgewunkene Freilose mit zurückdrehen.
+  do {
+    if (tour.done || tour.m === 0) { tour.r--; tour.m = tour.rounds[tour.r].length / 2; }
+    tour.done = false;
+    tour.m--;
+    tour.rounds[tour.r + 1].pop();
+    if (!tour.rounds[tour.r + 1].length) tour.rounds.splice(tour.r + 1);
+  } while (isBye(tour.r, tour.m));
+  saveTour(); renderTournament();
+}
+
+function bracketHTML() {
+  const total = Math.log2(tour.size);
+  let cols = "";
+  for (let r = 0; r < total; r++) {
+    const n = tour.size / 2 ** r, ids = tour.rounds[r] || [], next = tour.rounds[r + 1] || [];
+    let matches = "";
+    for (let m = 0; m < n / 2; m++) {
+      const w = next[m];
+      const slot = id => {
+        if (id === undefined) return `<div class="bslot tbd">offen</div>`;
+        if (id === null) return `<div class="bslot tbd">Freilos</div>`;
+        const name = esc(songTitle(tour.themes[id]));
+        return `<div class="bslot ${w === undefined ? "" : w === id ? "w" : "l"}" title="${name}">${name}</div>`;
+      };
+      matches += `<div class="bmatch ${!tour.done && r === tour.r && m === tour.m ? "now" : ""}">${slot(ids[m * 2])}${slot(ids[m * 2 + 1])}</div>`;
+    }
+    cols += `<div class="bround"><h3 class="label">${roundName(n)}</h3><div class="bcol">${matches}</div></div>`;
+  }
+  const champ = tour.done ? tour.themes[tour.rounds[total][0]] : null;
+  cols += `<div class="bround"><h3 class="label">Sieger</h3><div class="bcol"><div class="bmatch ${champ ? "champ" : ""}"><div class="bslot ${champ ? "w" : "tbd"}">${champ ? esc(songTitle(champ)) : "offen"}</div></div></div></div>`;
+  return `<div class="bracketwrap"><div class="bracket">${cols}</div></div>`;
+}
+
+function resultText() {
+  const total = Math.log2(tour.size);
+  const line = id => { const t = tour.themes[id]; return `${songTitle(t)} (${animeTitle(t.anime)} ${t.slug}) – ${artistLine(t)}`; };
+  const champ = tour.rounds[total][0], final = tour.rounds[total - 1];
+  const semis = (tour.rounds[total - 2] || []).filter(id => id !== null && !final.includes(id));
+  return [`🏆 Anime-Song-Turnier (${entrantsOf()} Songs)`, "", `1. ${line(champ)}`, `2. ${line(final.find(id => id !== champ))}`, ...semis.map(id => `3. ${line(id)}`)].join("\n");
+}
+
+function renderChampion() {
+  const t = tour.themes[tour.rounds[Math.log2(tour.size)][0]];
+  $("#app").innerHTML = `<div class="wrap"><div class="champ">
+    <div class="champcard rise"><div>${playerHTML(t, true)}${volumeHTML(t)}</div>
+      <div style="display:grid;gap:8px;min-width:0">
+        <div class="label">Sieger · ${entrantsOf()} Songs</div>
+        <div class="song">${esc(songTitle(t))}</div>
+        <div style="color:var(--muted)">${esc(artistLine(t))} · ${esc(animeTitle(t.anime))} ${esc(t.slug)}</div>
+        <div class="actions"><button type="button" class="btn primary" id="copyRes">Ergebnis kopieren</button><button type="button" class="btn" id="undo">Letztes Duell zurück</button><button type="button" class="btn ghost" id="newT">Neues Turnier</button></div>
+      </div>
+    </div>
+    <textarea class="copy" id="resText" readonly aria-label="Ergebnis als Text">${esc(resultText())}</textarea>
+    ${bracketHTML()}
+  </div></div>`;
+}
+
+function burst() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const b = document.createElement("div"); b.className = "burst";
+  for (let i = 0; i < 36; i++) {
+    const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 260, p = document.createElement("i");
+    p.style.setProperty("--x", Math.cos(a) * d + "px"); p.style.setProperty("--y", Math.sin(a) * d + 140 + "px");
+    p.style.animationDelay = Math.random() * 120 + "ms"; b.appendChild(p);
+  }
+  document.body.appendChild(b); setTimeout(() => b.remove(), 2000);
+}
+
+/* ---------- Einstellungen ---------- */
+
+const mb = n => (n / 1048576).toLocaleString("de-DE", { maximumFractionDigits: n < 10485760 ? 1 : 0 }) + " MB";
+
+function download(name, data) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: "application/json" }));
+  a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+function exportSongs() {
+  download(`sakuga-eigene-songs-${new Date().toISOString().slice(0, 10)}.json`, { app: "sakuga", kind: "songs", version: 1, custom: CUSTOM, replaced: REPLACED });
+  toast(`${CUSTOM.length} eigene Songs gesichert`);
+}
+
+async function importSongs(file) {
+  let d;
+  try { d = JSON.parse(await file.text()); } catch { return toast("Die Datei ist kein gültiges JSON"); }
+  if (d?.app !== "sakuga" || !Array.isArray(d.custom)) return toast("Das ist keine Sakuga-Sicherung eigener Songs");
+  let n = 0;
+  for (const c of d.custom) {
+    if (!c?.id || !c.anime || !c.title) continue;
+    const i = CUSTOM.findIndex(x => x.id === c.id);
+    if (i >= 0) CUSTOM[i] = c; else CUSTOM.push(c);
+    n++;
+  }
+  saveCustom();
+  if (d.replaced && typeof d.replaced === "object") { Object.assign(REPLACED, d.replaced); store.set("sakuga.replaced", REPLACED); }
+  toast(`${n} eigene Songs übernommen`);
+  renderSettings();
+}
+
+function clearApiCache() {
+  let n = 0;
+  try { Object.keys(localStorage).filter(k => k.startsWith("sakuga.c:") || k.startsWith("sakuga.f:")).forEach(k => { localStorage.removeItem(k); n++; }); } catch {}
+  memory.clear();
+  byId.clear();
+  toast("Zwischenspeicher geleert, Daten werden neu geladen");
+}
+
+const srow = (label, hint, controls) => `<div class="srow"><div class="sl"><b>${label}</b>${hint ? `<small>${hint}</small>` : ""}</div><div class="sc">${controls}</div></div>`;
+const pchip = (key, value, text) => `<button type="button" class="chip" data-pref="${key}" data-v="${value}" aria-pressed="${String(prefs[key]) === String(value)}">${text}</button>`;
+
+function renderSettings() {
+  const own = Object.keys(COVERS).filter(k => k.startsWith("ani")).length;
+  const vols = Object.keys(VOLUMES).length;
+  const uploads = CUSTOM.filter(c => String(c.video || "").startsWith("upload:")).length;
+  $("#app").innerHTML = `<div class="wrap settings">
+    <div class="rise"><h1 class="big">Einstellungen</h1><p>Alles hier bleibt in diesem Browser gespeichert.</p></div>
+
+    <section class="sgroup rise" style="--i:1"><h2>Darstellung</h2>
+      ${srow("Anime-Titel", "Wie Anime überall angezeigt werden. Songtitel bleiben immer im Original.", pchip("animeLang", "en", "Englisch") + pchip("animeLang", "romaji", "Romaji"))}
+      ${srow("Suchergebnisse", "Standardansicht für Suche und Season-Listen.", pchip("layout", "list", "Liste") + pchip("layout", "grid", "Kacheln"))}
+      ${srow("Fallende Blüten", "Die Blätter im Hintergrund.", pchip("petals", "true", "An") + pchip("petals", "false", "Aus"))}
+    </section>
+
+    <section class="sgroup rise" style="--i:2"><h2>Wiedergabe</h2>
+      ${srow("Bevorzugte Videoquelle", "AnisongDB hat fast alles, meist in 720p. AnimeThemes hat oft 1080p, aber nicht jeden Song. Fehlt ein Video oder lädt es nicht, springt die andere Quelle ein.", pchip("videoSource", "anisongdb", "AnisongDB") + pchip("videoSource", "animethemes", "AnimeThemes"))}
+      ${srow(`Eigene Lautstärken<span class="count">${vols}</span>`, "Für jeden Song, bei dem du den Regler verschoben hast, merkt sich Sakuga die Lautstärke.", `<button type="button" class="btn ghost danger" data-act="volReset" ${vols ? "" : "disabled"}>Alle auf 50 % zurücksetzen</button>`)}
+    </section>
+
+    <section class="sgroup rise" style="--i:3"><h2>Cover</h2>
+      ${srow(`Eigene Cover<span class="count">${own}</span>`, "Importiert ein Backup aus AniList Studio (dort auf „Exportieren“ klicken) oder eine Sakuga-Cover-Datei. Vorhandene Cover für denselben Anime werden überschrieben.", `<label class="btn ghost">Importieren<input type="file" id="coverImport" accept=".json,application/json" hidden></label><button type="button" class="btn ghost" data-act="coverExport" ${own ? "" : "disabled"}>Exportieren</button>`)}
+      ${srow("Alle eigenen Cover entfernen", "Danach zeigt Sakuga wieder die Cover von AniList.", `<button type="button" class="btn ghost danger" data-act="coverClear" ${own ? "" : "disabled"}>Entfernen</button>`)}
+    </section>
+
+    <section class="sgroup rise" style="--i:4"><h2>Eigene Songs</h2>
+      ${srow(`Sicherung<span class="count">${CUSTOM.length}</span>`, `Speichert deine selbst eingetragenen Songs als Datei, etwa für einen anderen Browser.${uploads ? ` Hochgeladene Videos (${uploads}) sind nicht in der Datei, die musst du dort neu hochladen.` : ""}`, `<label class="btn ghost">Importieren<input type="file" id="songImport" accept=".json,application/json" hidden></label><button type="button" class="btn ghost" data-act="songExport" ${CUSTOM.length ? "" : "disabled"}>Exportieren</button>`)}
+    </section>
+
+    <section class="sgroup rise" style="--i:5"><h2>Speicher</h2>
+      ${srow(`Belegt<span class="count" id="usage">…</span>`, "Hochgeladene Videos, eigene Cover und zwischengespeicherte Daten. Damit der Browser nichts davon von selbst löscht, fragt Sakuga beim ersten Upload nach dauerhaftem Speicher.", "")}
+      ${srow("Zwischenspeicher leeren", "Sakuga merkt sich Antworten von AnisongDB und AniList für 6 Stunden. Leeren, wenn neue Songs schneller auftauchen sollen. Eigene Songs, Cover und Videos bleiben.", `<button type="button" class="btn ghost" data-act="cacheClear">Leeren</button>`)}
+    </section>
+  </div>`;
+  navigator.storage?.estimate?.().then(e => { const u = $("#usage"); if (u) u.textContent = mb(e.usage || 0); }).catch(() => {});
+}
+
+document.addEventListener("change", e => {
+  const f = e.target.files?.[0];
+  if (!f) return;
+  if (e.target.id === "coverImport") { e.target.value = ""; importCovers(f); }
+  else if (e.target.id === "songImport") { e.target.value = ""; importSongs(f); }
+});
+
+document.addEventListener("click", async e => {
+  if (route().view !== "settings") return;
+  const p = e.target.closest("[data-pref]");
+  if (p) {
+    const k = p.dataset.pref, v = p.dataset.v;
+    prefs[k] = v === "true" ? true : v === "false" ? false : v;
+    savePrefs();
+    document.body.classList.toggle("calm", !prefs.petals);
+    document.querySelectorAll(`[data-pref="${k}"]`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
+    if (k === "animeLang") $("#lang").innerHTML = `<span class="${prefs.animeLang === "romaji" ? "on" : ""}">RO</span> / <span class="${prefs.animeLang === "en" ? "on" : ""}">EN</span>`;
+    return;
+  }
+  const a = e.target.closest("[data-act]");
+  if (!a || a.disabled) return;
+  const act = a.dataset.act;
+  // Löschen braucht einen zweiten Klick.
+  if (a.classList.contains("danger") && !a.classList.contains("sure")) { a.classList.add("sure"); a.dataset.label = a.textContent; a.textContent = "Wirklich?"; setTimeout(() => { if (a.isConnected) { a.classList.remove("sure"); a.textContent = a.dataset.label; } }, 3500); return; }
+  if (act === "coverExport") exportCovers();
+  else if (act === "songExport") exportSongs();
+  else if (act === "cacheClear") clearApiCache();
+  else if (act === "volReset") { for (const k of Object.keys(VOLUMES)) delete VOLUMES[k]; store.set("sakuga.vol", VOLUMES); toast("Lautstärken zurückgesetzt"); renderSettings(); }
+  else if (act === "coverClear") { for (const k of Object.keys(COVERS).filter(k => k.startsWith("ani"))) await saveCover(k, null); toast("Eigene Cover entfernt"); renderSettings(); }
+});
+
+/* ---------- Startseite ---------- */
+
+// Zuletzt angesehene Songs, die neuesten zuerst.
+let RECENT = store.get("sakuga.recent", []);
+function rememberRecent(t) {
+  RECENT = [t, ...RECENT.filter(x => x.id !== t.id)].slice(0, 12);
+  store.set("sakuga.recent", RECENT);
+}
+
+const dayKey = () => new Date().toISOString().slice(0, 10);
+const dayHash = str => { let h = 2166136261; for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
+const home = { data: null, loading: null, extra: 0 };
+
+async function loadHome() {
+  if (home.data || home.loading) return home.loading;
+  const cur = currentSeason();
+  home.loading = (async () => {
+    const [now, last] = await Promise.all([cur.year, cur.year - 1].map(y => findThemes({ q: "", type: "all", season: "all", year: y }).then(r => remember(r.themes)).catch(() => [])));
+    const songs = [...now, ...last].filter(t => t.video && t.src !== "custom" && t.type !== "IN");
+    home.data = { season: now.filter(t => t.anime.season === cur.season), pool: [...new Map(songs.map(t => [t.id, t])).values()].sort((a, b) => String(a.id).localeCompare(String(b.id))) };
+  })();
+  await home.loading;
+  home.loading = null;
+}
+
+function songOfDay() {
+  const pool = home.data?.pool || [];
+  if (!pool.length) return null;
+  return pool[(dayHash(dayKey()) + home.extra * 7919) % pool.length];
+}
+
+const quickTile = (href, icon, title, text, i, id = "") => `<a class="qt rise" style="--i:${i}" href="${href}"${id ? ` id="${id}"` : ""}><span class="ic">${icon}</span><b>${title}</b><small>${text}</small></a>`;
+const ICON = {
+  search: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>`,
+  cup: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>`,
+  plus: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`,
+  gear: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>`,
+};
+
+function tourStatus() {
+  if (!tour) return "Songs paarweise gegeneinander antreten lassen, bis einer gewinnt.";
+  if (tour.done) { const w = tour.themes[tour.rounds[Math.log2(tour.size)][0]]; return `Letzter Sieger: ${songTitle(w)}`; }
+  return `Läuft gerade: ${roundName(tour.rounds[tour.r].length)}, ${playedDuels()} von ${entrantsOf() - 1} Duellen. Weiter geht's!`;
+}
+
+function renderHome() {
+  const cur = currentSeason();
+  $("#app").innerHTML = `<div class="wrap home">
+    <section class="hero">
+      <svg class="bigbloom rise" viewBox="-12 -12 24 24" aria-hidden="true"><g fill="currentColor"><use href="#pt"/><use href="#pt" transform="rotate(72)"/><use href="#pt" transform="rotate(144)"/><use href="#pt" transform="rotate(216)"/><use href="#pt" transform="rotate(288)"/></g><circle r="1.8" fill="#ff5a8c"/></svg>
+      <h1 class="rise" style="--i:1">Sakuga<small>作画</small></h1>
+      <p class="rise" style="--i:2">Anime-Openings und -Endings finden, anhören und im Turnier gegeneinander antreten lassen.</p>
+      <label class="searchbox rise" style="--i:3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="hq" type="search" autocomplete="off" placeholder="Anime, Song oder Artist suchen…" aria-label="Suche"></label>
+    </section>
+
+    <section class="quick">
+      ${quickTile("#suche", ICON.search, "Songs entdecken", `Alle Openings und Endings aus ${cur.year}, filterbar nach Season, Jahr und Typ.`, 4)}
+      ${quickTile("#turnier", ICON.cup, tour && !tour.done ? "Turnier fortsetzen" : "Turnier starten", esc(tourStatus()), 5)}
+      ${quickTile("#neu", ICON.plus, "Song eintragen", CUSTOM.length ? `${CUSTOM.length} eigene ${CUSTOM.length === 1 ? "Song" : "Songs"} eingetragen. Fehlt noch einer?` : "Neue Songs, die AnisongDB noch nicht kennt, selbst hinzufügen.", 6)}
+      ${quickTile("#einstellungen", ICON.gear, "Einstellungen", "Cover importieren, Videoquelle, Darstellung und Sicherungen.", 7)}
+    </section>
+
+    <section class="hsec rise" style="--i:8"><div class="head"><h2>Song des Tages</h2><button type="button" id="sotdNext">Anderen Vorschlag</button></div>
+      <div id="sotd"><div class="skel"></div></div></section>
+
+    <section class="hsec rise" style="--i:9"><div class="head"><h2>Neu in ${SEASON_DE[cur.season]} ${cur.year}</h2><button type="button" id="seeSeason">Alle anzeigen</button></div>
+      <div id="hseason"><div class="skel"></div></div></section>
+
+    ${RECENT.length ? `<section class="hsec rise" style="--i:10"><div class="head"><h2>Zuletzt angesehen</h2><button type="button" id="clearRecent">Verlauf leeren</button></div>
+      <div class="hgrid">${RECENT.slice(0, 6).map((t, i) => cardHTML(t, i)).join("")}</div></section>` : ""}
+  </div>`;
+  ensureCovers(RECENT.slice(0, 6));
+  if (home.data) fillHome(); else loadHome().then(() => { if (route().view === "home") fillHome(); });
+}
+
+function fillHome() {
+  const t = songOfDay(), box = $("#sotd");
+  if (box) box.innerHTML = !t ? `<div class="message">Gerade lassen sich keine Songs laden.</div>` : `<div class="sotd"${t.anime.color ? ` style="--glow:${esc(t.anime.color)}"` : ""}>
+    <div>${playerHTML(t)}${volumeHTML(t)}</div>
+    <div style="min-width:0"><div class="label">${home.extra ? "Vorschlag" : "Heute"} · <span class="tag ${typeCls(t)}">${esc(t.slug)}</span></div>
+      <div class="song">${esc(songTitle(t))}</div>
+      <div class="sub">${esc(artistLine(t))}</div>
+      <div class="sub">${esc(animeTitle(t.anime))} · ${esc(seasonLabel(t.anime))}</div>
+      <div class="actions"><a class="btn primary" href="#song-${esc(t.id)}">Zum Song</a></div></div></div>`;
+  const season = home.data?.season || [];
+  const pick = shuffle(season.filter(x => x.video)).slice(0, 6);
+  const sbox = $("#hseason");
+  if (sbox) sbox.innerHTML = pick.length ? `<div class="hgrid">${pick.map((x, i) => cardHTML(x, i)).join("")}</div>` : `<div class="hint">Für die laufende Season sind noch keine Songs da. Fehlt dir einer, kannst du ihn <a href="#neu">selbst eintragen</a>.</div>`;
+  ensureCovers([...(t ? [t] : []), ...pick]);
+}
+
+document.addEventListener("click", e => {
+  if (route().view !== "home") return;
+  const id = e.target.closest("button")?.id;
+  if (id === "sotdNext") { home.extra++; fillHome(); }
+  else if (id === "seeSeason") { const cur = currentSeason(); Object.assign(state.query, { q: "", season: cur.season, year: cur.year }); $("#q").value = ""; location.hash = "suche"; runSearch(); }
+  else if (id === "clearRecent") { RECENT = []; store.set("sakuga.recent", RECENT); renderHome(); }
+});
+
+let homeTimer;
+document.addEventListener("input", e => {
+  if (e.target.id !== "hq") return;
+  clearTimeout(homeTimer);
+  homeTimer = setTimeout(() => {
+    const v = e.target.value.trim();
+    if (!v) return;
+    $("#q").value = v;
+    state.query.q = v; state.sort = "rel";
+    location.hash = "suche";
+    runSearch();
+    $("#q").focus();
+  }, 450);
+});
+
+/* ---------- Navigation über #-Adressen (Zurück-Taste funktioniert) ---------- */
+
+function route() {
+  const h = location.hash.slice(1);
+  const m = h.match(/^song-([tc]?\d+)$/);
+  if (m) return { view: "song", id: m[1] };
+  const e = h.match(/^bearbeiten-(c\d+)$/);
+  if (e) return { view: "edit", id: e[1] };
+  if (h === "neu") return { view: "new" };
+  if (h === "turnier") return { view: "tournament" };
+  if (h === "einstellungen") return { view: "settings" };
+  if (h === "suche") return { view: "search" };
+  return { view: "home" };
+}
+
+function render() {
+  const r = route();
+  const tab = r.view === "song" ? "search" : r.view === "edit" ? "new" : r.view;
+  document.querySelectorAll("nav.tabs a").forEach(a => a.setAttribute("aria-current", a.dataset.tab === tab ? "page" : "false"));
+  $("#lang").innerHTML = `<span class="${prefs.animeLang === "romaji" ? "on" : ""}">RO</span> / <span class="${prefs.animeLang === "en" ? "on" : ""}">EN</span>`;
+  if (r.view === "song") renderSong(r.id);
+  else if (r.view === "tournament") renderTournament();
+  else if (r.view === "new" || r.view === "edit") renderForm(r.id);
+  else if (r.view === "settings") renderSettings();
+  else if (r.view === "home") renderHome();
+  else renderSearch();
+}
+
+window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
+
+/* ---------- Eingaben ---------- */
+
+let typingTimer;
+$("#q").addEventListener("input", e => {
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => {
+    state.query.q = e.target.value.trim();
+    state.sort = "rel";
+    if (route().view !== "search") location.hash = "suche";
+    runSearch();
+  }, 300);
+});
+
+$("#lang").addEventListener("click", () => { prefs.animeLang = prefs.animeLang === "romaji" ? "en" : "romaji"; savePrefs(); render(); });
+
+$("#app").addEventListener("click", e => {
+  const el = e.target.closest("button"); if (!el) return;
+  const d = el.dataset;
+  if (d.f) { state.query[d.f] = d.v; return runSearch(); }
+  if (d.layout) { prefs.layout = d.layout; savePrefs(); return renderSearch(); }
+  if (d.src) { setup.source = d.src; return renderTournament(); }
+  if (d.ttype) {
+    setup.type = d.ttype;
+    if (setup.source === "pick") { document.querySelectorAll("[data-ttype]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.ttype === d.ttype))); return runPickSearch(); }
+    return renderTournament();
+  }
+  if (d.ptoggle) return togglePick(d.ptoggle);
+  if (d.size) { setup.size = +d.size; return renderTournament(); }
+  if (d.pick) return pick(+d.pick);
+  switch (el.id) {
+    case "toT": setup.source = "search"; setup.type = state.query.type; location.hash = "turnier"; return;
+    case "startT": return startTournament(+d.sizeFinal);
+    case "undo": return undo();
+    case "newT": tour = null; saveTour(); return renderTournament();
+    case "paddall": (setup.presults?.themes || []).slice(0, 40).forEach(t => { if (!isPicked(t.id)) PICKED.push(t); }); savePicked(); renderPickResults(); return renderPicked();
+    case "pclear":
+      if (!el.classList.contains("sure")) { el.classList.add("sure"); el.textContent = "Wirklich leeren?"; return; }
+      PICKED = []; savePicked(); renderPickResults(); return renderPicked();
+    case "copyRes": return copy(resultText(), $("#resText"));
+    case "showMore": state.shown += PAGE; return renderSearch(false);
+  }
+});
+
+$("#app").addEventListener("input", e => {
+  if (e.target.id === "tq") { setup.pq = e.target.value.trim(); return runPickSearch(); }
+  if (e.target.id !== "sizeIn") return;
+  const avail = setup.pool?.themes.length ?? 999;
+  const n = Math.round(+e.target.value);
+  const ok = n >= 2 && n <= avail;
+  if (ok) setup.size = n;
+  document.querySelectorAll("[data-size]").forEach(b => b.setAttribute("aria-pressed", String(ok && +b.dataset.size === n)));
+  e.target.closest(".custom").setAttribute("aria-pressed", String(ok && !SIZE_PRESETS.includes(n)));
+  $("#sizeHint").textContent = ok ? sizeHint(n) : `Bitte eine Zahl von 2 bis ${avail}`;
+  const start = $("#startT");
+  start.disabled = !ok || !setup.pool; start.dataset.sizeFinal = n; start.textContent = `Turnier mit ${ok ? n : "…"} Songs starten`;
+});
+
+$("#app").addEventListener("change", e => {
+  if (e.target.id === "sort") { state.sort = e.target.value; state.shown = PAGE; renderSearch(); }
+  if (e.target.id === "year") { state.query.year = e.target.value ? +e.target.value : null; runSearch(); }
+  if (e.target.id === "tSeason") { setup.season = e.target.value; renderTournament(); }
+  if (e.target.id === "tYear") { setup.year = +e.target.value; renderTournament(); }
+});
+
+document.addEventListener("keydown", e => {
+  const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
+  if (e.key === "/" && !typing) { e.preventDefault(); $("#q").focus(); return; }
+  if (route().view === "tournament" && tour && !tour.done && !typing) {
+    if (e.key === "ArrowLeft") pick(0);
+    else if (e.key === "ArrowRight") pick(1);
+    else if (e.key.toLowerCase() === "z") undo();
+  }
+});
+
+/* ---------- Fallende Blätter ---------- */
+(() => {
+  const box = $("#petals");
+  for (let i = 0; i < 9; i++) {
+    const p = document.createElement("i"), s = .6 + Math.random() * .8;
+    Object.assign(p.style, { left: Math.random() * 100 + "%", width: 10 * s + "px", height: 8 * s + "px", animationDuration: 16 + Math.random() * 14 + "s", animationDelay: -Math.random() * 30 + "s" });
+    box.appendChild(p);
+  }
+  // Blütenmuster im Hintergrund
+  const petal = "M0 -1 C -4 -4 -4 -9 -1.5 -11 L 0 -9 L 1.5 -11 C 4 -9 4 -4 0 -1Z";
+  const flower = (x, y, sc, rot, op) => `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${sc})" fill="#ffb7c5" fill-opacity="${op}">${[0, 72, 144, 216, 288].map(r => `<path d="${petal}" transform="rotate(${r})"/>`).join("")}<circle r="1.6" fill="#ff5a8c" fill-opacity="${op * 1.4}"/></g>`;
+  const loose = (x, y, rot, op) => `<path d="${petal}" transform="translate(${x} ${y}) rotate(${rot}) scale(.8)" fill="#ffb7c5" fill-opacity="${op}"/>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="260" height="260">${flower(40, 50, 1.3, 10, .055)}${flower(190, 160, .9, 40, .045)}${flower(110, 230, .6, 70, .04)}${loose(200, 40, 30, .05)}${loose(70, 150, 120, .04)}${loose(240, 240, 200, .035)}</svg>`;
+  document.body.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+})();
+
+render();
+runSearch();
+setTimeout(() => checkCustom(), 2500);
+if ("indexedDB" in window) loadCovers().then(patchCovers);
+else Object.assign(COVERS, store.get("sakuga.covers", {}));
+</script>
+</body>
+</html>
